@@ -129,11 +129,11 @@ export default function Assembly({ ids, you = '#3A6E85', height = 520, onOpen, l
           g.strokeStyle = '#efede9'; g.lineWidth = 1
           g.beginPath(); g.arc(x, y, r + 5, 0, Math.PI * 2); g.stroke()
         }
-        if (labels && (n.deg > 2 || i === hov || (lit && lit.has(i))) && W() > 420 && !dim) {
+        if (labels && i !== hov && (n.deg > 2 || (lit && lit.has(i))) && W() > 420 && !dim) {
           g.font = '500 9px "Martian Mono", monospace'
           const txt = n.f.t.toUpperCase().slice(0, 26)
           const tw = g.measureText(txt).width
-          if (i === hov || free(x + r + 7, y, tw)) {
+          if (free(x + r + 7, y, tw)) {
             placed.push({ x: x + r + 7, y, w: tw })
             g.fillStyle = i === hov ? '#efede9' : 'rgba(168,166,161,0.8)'
             g.fillText(txt, x + r + 7, y + 3)
@@ -199,14 +199,7 @@ export default function Assembly({ ids, you = '#3A6E85', height = 520, onOpen, l
     <div ref={wrap} className={`assembly ${className}`} style={{ position: 'relative', height, touchAction: 'pan-y' }}>
       <canvas ref={cv} style={{ width: '100%', height: '100%', display: 'block', cursor: hover ? 'pointer' : 'default' }} data-cursor={hover ? 'DRAG · OPEN' : undefined} />
       {hover && (
-        <div className="assembly-tip" style={{ position: 'absolute', left: Math.min(hover.x + 18, (wrap.current?.clientWidth || 400) - 210), top: hover.y + 14, pointerEvents: 'none', display: 'flex', gap: 10, background: 'rgba(10,10,11,.92)', boxShadow: 'inset 0 0 0 1px var(--line-2)', padding: 8, width: 200, zIndex: 3 }}>
-          <img src={poster(hover.f.id)} alt="" style={{ width: 44, height: 66, objectFit: 'cover' }} />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 650, fontSize: 13, lineHeight: 1.15 }}>{hover.f.t}</div>
-            <div className="spec" style={{ marginTop: 4 }}>{hover.f.y} · {hover.f.dir[0] || ''}</div>
-            {hover.who.length > 0 && <div className="spec lit" style={{ marginTop: 4 }}>{hover.who.join(' · ')}</div>}
-          </div>
-        </div>
+        <AssemblyTip hover={hover} W={wrap.current?.clientWidth || 400} H={wrap.current?.clientHeight || 400} />
       )}
     </div>
   )
@@ -215,4 +208,28 @@ export default function Assembly({ ids, you = '#3A6E85', height = 520, onOpen, l
 function hexA(hex, a) {
   const n = parseInt(hex.slice(1), 16)
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`
+}
+
+/* The card for a hovered star. Sits below and right of the cursor label; flips to stay inside the panel. */
+function AssemblyTip({ hover, W, H }) {
+  const w = Math.min(320, W - 24), h = 132
+  const right = hover.x + 26 + w > W - 12
+  const below = hover.y + 46 + h < H - 12
+  const left = right ? Math.max(12, hover.x - 26 - w) : hover.x + 26
+  const top = below ? hover.y + 46 : Math.max(12, hover.y - 26 - h)
+  return (
+    <div className="assembly-tip" style={{ left, top, width: w }}>
+      <img src={poster(hover.f.id)} alt="" />
+      <div className="at-body">
+        <b className="at-title">{hover.f.t}</b>
+        <span className="spec">{hover.f.y}{hover.f.dir[0] ? ` · ${hover.f.dir[0]}` : ''}</span>
+        {hover.who.length > 0 && (
+          <div className="at-who">
+            <span className="spec">Shared</span>
+            {hover.who.map((p) => <span key={p} className="at-person">{p}</span>)}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }

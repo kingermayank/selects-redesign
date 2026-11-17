@@ -226,3 +226,17 @@ a { color: inherit; text-decoration: none; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.12s !important; }
   .grain { animation: none; }
 }
+
+/* ── assembly hover card ─────────────────────────────────── */
+.assembly-tip {
+  position: absolute; z-index: 3; pointer-events: none;
+  display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; align-items: start;
+  padding: 16px; background: rgba(10,10,11,.94); box-shadow: inset 0 0 0 1px var(--line-2), 0 24px 48px -16px rgba(0,0,0,.8);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.assembly-tip img { width: 76px; aspect-ratio: 2 / 3; height: auto; object-fit: cover; }
+.at-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.at-title { font-size: 17px; font-weight: 650; line-height: 1.15; letter-spacing: -0.015em; }
+.at-who { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+.at-who .spec { margin-bottom: 2px; }
+.at-person { font-size: 13px; line-height: 1.3; color: var(--select); }
