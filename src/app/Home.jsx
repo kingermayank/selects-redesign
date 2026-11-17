@@ -57,7 +57,6 @@ export default function Home({ arch }) {
         ))}
       </section>
 
-      <Nudge s={s} t={t} torn={torn} until={until} hour={hour} />
 
       <YearStrip s={s} />
 
@@ -65,22 +64,6 @@ export default function Home({ arch }) {
       {th && hole.length > 2 && <Row title={`${th.who}, all night`} items={hole} />}
       <Row title="The Wallet" items={wallet} />
     </div>
-  )
-}
-
-function Nudge({ s, t, torn, until, hour }) {
-  const f = torn.length ? film(torn[torn.length - 1]) : t[0] ? t[0].f : null
-  if (!f) return null
-  const end = hour + (f.rt || 120) / 60
-  const endH = Math.floor(end) % 24, endM = Math.round((end % 1) * 60)
-  const fmt = (h, m) => `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h % 24 >= 12 ? 'PM' : 'AM'}`
-  return (
-    <motion.aside className="nudge" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-      <span className="nudge-bar" />
-      <div>
-        <p>{`${f.t}: start ${fmt(hour, 0)}, credits ${fmt(endH, endM)}.`}</p>
-      </div>
-    </motion.aside>
   )
 }
 

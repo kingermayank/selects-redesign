@@ -74,9 +74,6 @@
 .ht-item { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .ht-swap { align-self: flex-end; }
 @media (max-width: 1280px) { .home-tickets { grid-template-columns: 1fr; max-width: 760px; } }
-.nudge { position: relative; z-index: 1; display: flex; gap: 16px; margin: 28px var(--gutter) 8px; padding: 18px 20px; background: var(--base-2); box-shadow: inset 0 0 0 1px var(--line); max-width: 760px; }
-.nudge-bar { flex: none; width: 4px; background: var(--select); transform: skewX(var(--skew)); }
-.nudge p { margin: 6px 0 0; font-size: 15px; line-height: 1.45; }
 
 .year { padding: 36px var(--gutter) 8px; }
 .year-hov { color: var(--fg-2); font-weight: 500; }
