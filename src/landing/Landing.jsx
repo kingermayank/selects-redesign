@@ -41,7 +41,6 @@ export default function Landing() {
     <div className="landing">
       <Nav to={to} start={() => (returning ? go('home', { wipe: true }) : start(''))} returning={returning} />
       <Hero start={start} />
-      <Credits />
       <Manifesto />
       <TicketSection />
       <StripSection />
@@ -79,7 +78,7 @@ function Nav({ to, start, returning }) {
           <button key={id} className="link-spec" onClick={() => to(id)}>{l}</button>
         ))}
       </nav>
-      <button ref={mag} className="btn nav-cta" onClick={start}>{returning ? 'Open Selects' : 'Use beta'}<span className="arr"><Arrow /></span></button>
+      <button ref={mag} className="btn nav-cta" onClick={start}>{returning ? 'Open Selects' : 'Try now'}<span className="arr"><Arrow /></span></button>
     </header>
   )
 }
@@ -117,26 +116,17 @@ function Hero({ start }) {
         <h1 className="verdict hero-h">
           <Rise text={'The take\nworth keeping.'} delay={0.35} stagger={0.09} />
         </h1>
-        <div className="hero-row">
-          <motion.p className="lead hero-lead" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 1, ease: [0.16, 1, 0.3, 1] }}>
-            Three films for tonight, read from your diary.
-          </motion.p>
-          <motion.form
-            className="hero-form"
-            onSubmit={(e) => { e.preventDefault(); start(lb) }}
-            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          >
+        <motion.div className="hero-cta" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 1, ease: [0.16, 1, 0.3, 1] }}>
+          <p className="lead hero-lead">Three films for tonight, read from your diary.</p>
+          <form className="hero-form" onSubmit={(e) => { e.preventDefault(); start(lb) }}>
             <label className="field hero-field">
               <span className="pre">letterboxd.com/</span>
-              <input value={lb} onChange={(e) => setLb(e.target.value)} placeholder="your-username" autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-label="Letterboxd username" />
+              <input id="hero-lb" value={lb} onChange={(e) => setLb(e.target.value)} placeholder="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-label="Letterboxd username" />
             </label>
             <button className="btn lit hero-go" type="submit">Read me <span className="arr"><Arrow /></span></button>
-            <button type="button" className="link-spec hero-alt" onClick={() => start('')}>Start without Letterboxd <Arrow /></button>
-          </motion.form>
-        </div>
-      </motion.div>
-      <motion.div className="hero-foot" style={{ opacity: textO }}>
-        <span className="hero-scroll"><i /></span>
+          </form>
+          <button type="button" className="text-link" onClick={() => start('')}>Start without Letterboxd <Arrow /></button>
+        </motion.div>
       </motion.div>
     </section>
   )
@@ -146,21 +136,6 @@ function FallbackStrip() {
   return (
     <div className="fallback-strip">
       {HERO_STILLS.slice(0, 8).map((id) => <Img key={id} src={backdrop(id)} />)}
-    </div>
-  )
-}
-
-/* ── CREDITS TICKER ────────────────────────────────────────── */
-function Credits() {
-  const row = useMemo(() => films().filter((f) => f.dp[0] && f.sc > 72).slice(0, 26), [])
-  const items = row.map((f) => (
-    <span key={f.id} className="credit">
-      <b>{f.t}</b> <span>{f.y}</span> <span>DIR. {f.dir[0]}</span> <span>DP {f.dp[0]}</span> <i className="bar-atom" />
-    </span>
-  ))
-  return (
-    <div className="credits" aria-hidden="true">
-      <div className="credits-track">{items}{items}</div>
     </div>
   )
 }
@@ -489,11 +464,11 @@ function Final({ start }) {
       <form className="f-form" onSubmit={(e) => { e.preventDefault(); start(lb) }}>
         <label className="field">
           <span className="pre">letterboxd.com/</span>
-          <input value={lb} onChange={(e) => setLb(e.target.value)} placeholder="your-username" autoCapitalize="none" spellCheck={false} aria-label="Letterboxd username" />
+          <input id="final-lb" value={lb} onChange={(e) => setLb(e.target.value)} placeholder="username" autoCapitalize="none" spellCheck={false} aria-label="Letterboxd username" />
         </label>
         <button className="btn lit" type="submit">Read me <span className="arr"><Arrow /></span></button>
       </form>
-      <button className="link-spec" onClick={() => start('')}>Start without Letterboxd <Arrow /></button>
+      <button className="text-link" onClick={() => start('')}>Start without Letterboxd <Arrow /></button>
     </section>
   )
 }
