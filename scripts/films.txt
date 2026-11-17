@@ -1,0 +1,261 @@
+Heat|1995
+Thief|1981
+Collateral|2004
+Le Samouraï|1967
+Drive|2011
+Miami Vice|2006
+The Insider|1999
+Manhunter|1986
+Point Blank|1967
+Le Cercle Rouge|1970
+To Live and Die in L.A.|1985
+The Driver|1978
+Blade Runner|1982
+Blade Runner 2049|2017
+In the Mood for Love|2000
+Chungking Express|1994
+Fallen Angels|1995
+2046|2004
+Happy Together|1997
+Parasite|2019
+Memories of Murder|2003
+Mother|2009
+Oldboy|2003
+Burning|2018
+Decision to Leave|2022
+Interstellar|2014
+Inception|2010
+The Dark Knight|2008
+Oppenheimer|2023
+The Prestige|2006
+Memento|2000
+Dune|2021
+Dune: Part Two|2024
+Arrival|2016
+Sicario|2015
+Prisoners|2013
+Enemy|2013
+No Country for Old Men|2007
+Fargo|1996
+The Big Lebowski|1998
+Inside Llewyn Davis|2013
+There Will Be Blood|2007
+Phantom Thread|2017
+The Master|2012
+Boogie Nights|1997
+Magnolia|1999
+Punch-Drunk Love|2002
+Licorice Pizza|2021
+One Battle After Another|2025
+Pulp Fiction|1994
+Jackie Brown|1997
+Once Upon a Time... in Hollywood|2019
+Taxi Driver|1976
+Goodfellas|1990
+The King of Comedy|1982
+Raging Bull|1980
+The Irishman|2019
+Killers of the Flower Moon|2023
+The Godfather|1972
+The Godfather Part II|1974
+The Conversation|1974
+Apocalypse Now|1979
+Chinatown|1974
+The French Connection|1971
+Dog Day Afternoon|1975
+Network|1976
+All the President's Men|1976
+Alien|1979
+Aliens|1986
+The Thing|1982
+Escape from New York|1981
+Halloween|1978
+Jaws|1975
+Close Encounters of the Third Kind|1977
+Raiders of the Lost Ark|1981
+Back to the Future|1985
+Terminator 2: Judgment Day|1991
+The Terminator|1984
+RoboCop|1987
+Die Hard|1988
+The Matrix|1999
+Fight Club|1999
+Se7en|1995
+Zodiac|2007
+The Social Network|2010
+Gone Girl|2014
+Mulholland Drive|2001
+Blue Velvet|1986
+Lost Highway|1997
+Eyes Wide Shut|1999
+The Shining|1980
+2001: A Space Odyssey|1968
+A Clockwork Orange|1971
+Barry Lyndon|1975
+Full Metal Jacket|1987
+Vertigo|1958
+Rear Window|1954
+North by Northwest|1959
+Psycho|1960
+Sunset Boulevard|1950
+Seven Samurai|1954
+Rashomon|1950
+High and Low|1963
+Ran|1985
+Tokyo Story|1953
+Spirited Away|2001
+Princess Mononoke|1997
+My Neighbor Totoro|1988
+Akira|1988
+Ghost in the Shell|1995
+Perfect Blue|1997
+Your Name.|2016
+Stalker|1979
+Solaris|1972
+Persona|1966
+The Seventh Seal|1957
+8½|1963
+La Dolce Vita|1960
+Breathless|1960
+Pierrot le Fou|1965
+The 400 Blows|1959
+Cléo from 5 to 7|1962
+Playtime|1967
+Paris, Texas|1984
+Wings of Desire|1987
+Portrait of a Lady on Fire|2019
+Amélie|2001
+Three Colours: Blue|1993
+Céline and Julie Go Boating|1974
+Beau Travail|1999
+Lost in Translation|2003
+Her|2013
+Before Sunrise|1995
+Before Sunset|2004
+Eternal Sunshine of the Spotless Mind|2004
+Moonlight|2016
+Past Lives|2023
+Aftersun|2022
+Call Me by Your Name|2017
+Carol|2015
+Brokeback Mountain|2005
+La La Land|2016
+Whiplash|2014
+Lady Bird|2017
+Frances Ha|2012
+The Grand Budapest Hotel|2014
+Fantastic Mr. Fox|2009
+Moonrise Kingdom|2012
+The Royal Tenenbaums|2001
+Rushmore|1998
+Asteroid City|2023
+Everything Everywhere All at Once|2022
+Uncut Gems|2019
+Good Time|2017
+Marty Supreme|2025
+The Lighthouse|2019
+The Witch|2015
+Hereditary|2018
+Midsommar|2019
+Get Out|2017
+Nope|2022
+Us|2019
+It Follows|2014
+The Babadook|2014
+Possession|1981
+Suspiria|1977
+Audition|1999
+Mad Max: Fury Road|2015
+Furiosa: A Mad Max Saga|2024
+John Wick|2014
+The Raid|2011
+Hard Boiled|1992
+The Killer|1989
+Ronin|1998
+Mission: Impossible – Fallout|2018
+Top Gun: Maverick|2022
+Casino Royale|2006
+Skyfall|2012
+The Bourne Ultimatum|2007
+No Time to Die|2021
+Children of Men|2006
+Roma|2018
+Gravity|2013
+Birdman or (The Unexpected Virtue of Ignorance)|2014
+The Revenant|2015
+Anatomy of a Fall|2023
+The Zone of Interest|2023
+Poor Things|2023
+The Favourite|2018
+The Lobster|2015
+Tár|2022
+Anora|2024
+The Substance|2024
+The Brutalist|2024
+Conclave|2024
+Challengers|2024
+Sinners|2025
+Weapons|2025
+Nosferatu|2024
+Civil War|2024
+Ex Machina|2014
+Annihilation|2018
+Under the Skin|2013
+Spider-Man: Into the Spider-Verse|2018
+WALL·E|2008
+Ratatouille|2007
+Up|2009
+Toy Story|1995
+Paddington 2|2017
+Amadeus|1984
+Casablanca|1942
+Singin' in the Rain|1952
+Some Like It Hot|1959
+The Apartment|1960
+12 Angry Men|1957
+Lawrence of Arabia|1962
+The Good, the Bad and the Ugly|1966
+Once Upon a Time in the West|1968
+Unforgiven|1992
+Do the Right Thing|1989
+Malcolm X|1992
+City of God|2002
+Pan's Labyrinth|2006
+Y Tu Mamá También|2001
+Amores Perros|2000
+Free Solo|2018
+Man on Wire|2008
+Jiro Dreams of Sushi|2011
+Senna|2010
+Amy|2015
+Searching for Sugar Man|2012
+Won't You Be My Neighbor?|2018
+The Act of Killing|2012
+Hoop Dreams|1994
+Grizzly Man|2005
+Honeyland|2019
+Fire of Love|2022
+Apollo 11|2019
+Exit Through the Gift Shop|2010
+Stop Making Sense|1984
+Summer of Soul (...Or, When the Revolution Could Not Be Televised)|2021
+The Thin Blue Line|1988
+Paris Is Burning|1990
+Grey Gardens|1975
+Koyaanisqatsi|1982
+Baraka|1992
+Three Identical Strangers|2018
+Minding the Gap|2018
+All the Beauty and the Bloodshed|2022
+20 Days in Mariupol|2023
+Navalny|2022
+The Odyssey|2026
+Project Hail Mary|2026
+Dune: Part Three|2026
+Spider-Man: Brand New Day|2026
+Hamnet|2025
+Bugonia|2025
+Sentimental Value|2025
+The Secret Agent|2025
+Frankenstein|2025
+Train Dreams|2025
