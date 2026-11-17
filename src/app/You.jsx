@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Arrow } from '../components/Icons.jsx'
 import { motion } from 'framer-motion'
 import Assembly from '../components/Assembly.jsx'
 import { Counter, Mark, useRoute } from '../components/ui.jsx'
@@ -62,7 +63,7 @@ export default function You({ arch }) {
         <div className="print-wrap">
           <motion.div className="print" whileHover={{ rotate: -1.2, y: -6 }} transition={{ type: 'spring', stiffness: 200, damping: 18 }}>
             <div className="print-field">
-              <Mark size={30} lit={2} litColour="#efede9" ink="rgba(10,10,11,.85)" />
+              <Mark size={30} />
               <div className="print-posters">{s.positive.slice(0, 3).map((id) => <img key={id} src={poster(id)} alt="" />)}</div>
             </div>
             <div className="print-body">
@@ -72,7 +73,7 @@ export default function You({ arch }) {
             </div>
           </motion.div>
           <div className="print-side">
-            <button className="btn" onClick={copy}>{copied ? 'Copied' : 'Copy the line'} <span className="arr">→</span></button>
+            <button className="btn" onClick={copy}>{copied ? 'Copied' : 'Copy the line'} <span className="arr"><Arrow /></span></button>
             <code className="print-line">{line}</code>
           </div>
         </div>

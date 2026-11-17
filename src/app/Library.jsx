@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Arrow } from '../components/Icons.jsx'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { Poster, useRoute } from '../components/ui.jsx'
 import { film, colour, poster, backdrop } from '../lib/films.js'
@@ -72,7 +73,7 @@ export default function Library() {
               </button>
             )
           })}
-          {!list.length && <div className="empty-card"><span className="spec">Nothing yet</span><button className="btn ghost" onClick={() => go('hunt')}>Hunt a film →</button></div>}
+          {!list.length && <div className="empty-card"><span className="spec">Nothing yet</span><button className="btn ghost" onClick={() => go('hunt')}>Hunt a film <Arrow /></button></div>}
         </motion.div>
       </AnimatePresence>
     </div>

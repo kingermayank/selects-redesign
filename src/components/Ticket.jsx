@@ -59,11 +59,11 @@ export default function Ticket({ f, why, slot, index = 0, torn: tornProp = false
         style={{ x, y, rotate: rot, transformOrigin: '0% 0%' }}
         onDrag={(_, i) => { if (i.offset.x > 86 || i.offset.y > 110) tear() }}
         onDragEnd={(_, i) => { if (i.offset.x > 60 || i.velocity.x > 500) tear() }}
-        data-cursor={torn ? undefined : 'TEAR →'}
+        data-cursor={torn ? undefined : 'TEAR'}
         whileTap={{ scale: 0.985 }}
       >
         <span className="spec">Admit one</span>
-        <div className="stub-mark"><Mark size={26} lit={2} ink="#0a0a0b" /></div>
+        <div className="stub-mark"><Mark size={24} ink="#0a0a0b" /></div>
         <span className="stub-seat numeral">{s}</span>
         <span className="spec">{time}</span>
         <button className="stub-tear sr-only" onClick={tear}>Keep {f.t} for tonight</button>

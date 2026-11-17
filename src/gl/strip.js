@@ -55,7 +55,7 @@ export function edgeTexture() {
   g.fillStyle = '#fff'
   g.font = '600 30px "Martian Mono", ui-monospace, monospace'
   g.textBaseline = 'middle'
-  const words = ['SELECTS 5219', '▸ 24A', '▸ 25', 'SAFETY FILM', '▸ 26', 'THE TAKE WORTH KEEPING', '▸ 27A']
+  const words = ['SELECTS 5219', '24A', '25', 'SAFETY FILM', '26', 'THE TAKE WORTH KEEPING', '27A']
   let x = 20
   let i = 0
   while (x < c.width) {

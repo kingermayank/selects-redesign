@@ -41,7 +41,7 @@
 
 /* ── splash ────────────────────────────────────────────────── */
 .splash { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; cursor: pointer; }
-.splash-word { font-variation-settings: 'wdth' 125; font-weight: 800; font-size: 28px; margin-top: 14px; }
+.splash-word { font-variation-settings: 'wdth' 100; font-weight: 800; font-size: 30px; margin-top: 14px; }
 
 /* ── name ──────────────────────────────────────────────────── */
 .name-ticket {
@@ -188,7 +188,7 @@
   .ob-split { grid-template-columns: 1fr; padding-top: 72px; padding-bottom: 170px; }
   .q { position: relative; top: 0; padding-top: 8px; }
   .q-mark { margin-bottom: 16px; height: 44px; }
-  .q-mark svg { width: 44px; height: 44px; }
+  .q-mark svg { height: 44px; width: auto; }
   .q-h { font-size: clamp(26px, 7.4vw, 40px); }
   .ob-right.center { min-height: 0; padding-top: 28px; }
   .wall { grid-template-columns: repeat(3, 1fr); gap: 12px 8px; }

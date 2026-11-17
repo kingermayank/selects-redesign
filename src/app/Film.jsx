@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Arrow } from '../components/Icons.jsx'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Img, useRoute } from '../components/ui.jsx'
 import Assembly from '../components/Assembly.jsx'
@@ -42,7 +43,7 @@ export default function Film({ id }) {
       <div className="film-hero">
         <motion.div className="film-bg" style={{ y, scale: sc }}><Img src={backdrop(id)} alt="" eager /></motion.div>
         <div className="film-shade" />
-        <button className="film-back link-spec" onClick={() => history.length > 1 ? history.back() : go('home')}>← Back</button>
+        <button className="film-back link-spec" onClick={() => history.length > 1 ? history.back() : go('home')}><Arrow dir="left" /> Back</button>
         <div className="film-title">
           <span className="spec">{f.y} · {fmtRuntime(f.rt)} · {f.cert || 'NR'} · {f.g.slice(0, 2).join(' / ')}</span>
           {f.logo ? <Img src={logo(id)} alt={f.t} className="film-logo" eager /> : <h1 className="verdict film-h">{f.t}</h1>}
@@ -62,7 +63,7 @@ export default function Film({ id }) {
           </section>
 
           <div className="film-actions">
-            <button className={`btn ${kept ? 'ghost' : 'lit'}`} onClick={() => { tick(12); setState((st) => ({ kept: [...new Set([...(st.kept || []), id])] })) }} disabled={kept}>{kept ? 'Kept' : 'Keep for tonight'} <span className="arr">→</span></button>
+            <button className={`btn ${kept ? 'ghost' : 'lit'}`} onClick={() => { tick(12); setState((st) => ({ kept: [...new Set([...(st.kept || []), id])] })) }} disabled={kept}>{kept ? 'Kept' : 'Keep for tonight'} <span className="arr"><Arrow /></span></button>
             <button className={`btn ghost ${inList ? 'on' : ''}`} onClick={() => { tick(6); toggleIn('watchlist', id) }}>{inList ? 'On the watchlist' : 'Watchlist'}</button>
             <div className="log">
               <span className="spec">{rated ? 'Logged' : 'Rate'}</span>

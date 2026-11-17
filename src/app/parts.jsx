@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { Arrow } from '../components/Icons.jsx'
 import { motion } from 'framer-motion'
 import { Poster, useRoute } from '../components/ui.jsx'
 import { colour } from '../lib/films.js'
@@ -17,8 +18,8 @@ export function Row({ title, kicker, items, wide = false, onAll }) {
           <h3 className="row-title">{title}</h3>
         </div>
         <div className="row-ctl">
-          <button className="row-btn" onClick={() => nudge(-1)} aria-label="Scroll left">←</button>
-          <button className="row-btn" onClick={() => nudge(1)} aria-label="Scroll right">→</button>
+          <button className="row-btn" onClick={() => nudge(-1)} aria-label="Scroll left"><Arrow dir="left" /></button>
+          <button className="row-btn" onClick={() => nudge(1)} aria-label="Scroll right"><Arrow /></button>
         </div>
       </div>
       <div className="row-track no-scrollbar" ref={ref}>

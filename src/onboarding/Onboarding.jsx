@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { Arrow } from '../components/Icons.jsx'
 import { motion, AnimatePresence, LayoutGroup, useMotionValue, animate } from 'framer-motion'
 import { Mark, Clap, BarProgress, Poster, Counter, Img, useRoute } from '../components/ui.jsx'
 import Assembly from '../components/Assembly.jsx'
@@ -36,7 +37,7 @@ export default function Onboarding() {
       {chrome && (
         <header className="ob-top">
           <button className="ob-back link-spec" onClick={idx <= 1 ? () => go('', { wipe: true }) : back} aria-label="Back">
-            <span className="ob-chev">←</span> {idx <= 1 ? 'Selects' : 'Back'}
+            <span className="ob-chev"><Arrow dir="left" /></span> {idx <= 1 ? 'Selects' : 'Back'}
           </button>
           <BarProgress total={COUNTED.length} at={ci} />
           <span className="spec ob-count">{String(ci + 1).padStart(2, '0')} / {String(COUNTED.length).padStart(2, '0')}</span>
@@ -89,7 +90,7 @@ function CTA({ label, onClick, disabled, secondary, onSecondary, lit }) {
             {label}
           </motion.span>
         </AnimatePresence>
-        <span className="arr">→</span>
+        <span className="arr"><Arrow /></span>
       </button>
     </div>
   )
@@ -102,7 +103,7 @@ function Splash({ onDone }) {
   return (
     <div className="splash" onClick={onDone}>
       <Clap size={148} delay={0.35} onDone={() => setShut(true)} />
-      <motion.div className="splash-word" initial={{ opacity: 0, letterSpacing: '0.6em' }} animate={shut ? { opacity: 1, letterSpacing: '0.12em' } : {}} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}>
+      <motion.div className="splash-word" initial={{ opacity: 0, letterSpacing: '0.5em' }} animate={shut ? { opacity: 1, letterSpacing: '0.01em' } : {}} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}>
         SELECTS
       </motion.div>
       <motion.p className="spec" initial={{ opacity: 0 }} animate={shut ? { opacity: 1 } : {}} transition={{ delay: 0.3, duration: 0.8 }}>The take worth keeping</motion.p>
@@ -129,7 +130,7 @@ function Name({ s, next }) {
             </div>
             <div className="nt-row"><span className="spec">Screen 01</span><span className="spec">Row F · 07</span><span className="spec">Tonight</span></div>
           </div>
-          <div className="nt-r"><Mark size={34} lit={2} ink="#0a0a0b" /><span className="numeral">No. 0001</span></div>
+          <div className="nt-r"><Mark size={30} ink="#0a0a0b" /><span className="numeral">No. 0001</span></div>
         </motion.div>
         <form className="name-form" onSubmit={(e) => { e.preventDefault(); if (v.trim()) save() }}>
           <label className="field">
@@ -291,7 +292,7 @@ function Neutral({ s, next }) {
             const on = s.axes.includes(a.v)
             return (
               <motion.button key={a.v} className={`axis ${on ? 'on' : ''}`} onClick={() => toggle(a.v)} aria-pressed={on} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.07, duration: 0.7, ease: [0.16, 1, 0.3, 1] }} whileTap={{ scale: 0.985 }}>
-                <span className="axis-mark"><Mark size={34} layout={on ? a.layout : 'mark'} lit={on ? 2 : -1} ink={on ? 'var(--fg)' : 'var(--fg-4)'} /></span>
+                <span className="axis-mark"><Mark size={30} five layout={on ? a.layout : 'mark'} lit={on ? 2 : -1} ink={on ? 'var(--fg)' : 'var(--fg-4)'} /></span>
                 <span className="axis-txt"><b>{a.l}</b><span className="spec">{a.sub}</span></span>
                 <span className={`axis-check ${on ? 'on' : ''}`} />
               </motion.button>
@@ -374,7 +375,7 @@ function Import({ s, next }) {
       <div className="ob-right center">
         <div className="imp">
           <div className="imp-tile main">
-            <div className="imp-row"><b>Letterboxd</b>{linked && <motion.span className="spec lit" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}>● Linked</motion.span>}</div>
+            <div className="imp-row"><b>Letterboxd</b>{linked && <motion.span className="spec lit" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}><i className="live-dot" /> Linked</motion.span>}</div>
             <form className="imp-form" onSubmit={(e) => { e.preventDefault(); link() }}>
               <label className="field">
                 <span className="pre">letterboxd.com/</span>

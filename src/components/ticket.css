@@ -56,7 +56,7 @@
 }
 .ticket-stub:active { cursor: grabbing; }
 .ticket-stub .spec { color: #3b3a38; font-size: 9px; }
-.stub-seat { font-size: 13px; line-height: 1.2; }
+.stub-seat { font-size: 12px; line-height: 1.2; white-space: nowrap; }
 .stub-mark { margin: 2px 0; }
 .ticket.is-torn .ticket-stub { pointer-events: none; }
 .ticket.is-torn .ticket-perf { opacity: 0; }
@@ -72,5 +72,5 @@
 @media (max-width: 520px) {
   .ticket { height: 208px; --stub: 84px; }
   .ticket-stub { padding: 12px 10px 12px 12px; }
-  .stub-seat { font-size: 11px; }
+  .stub-seat { font-size: 10px; }
 }

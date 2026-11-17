@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
+import { Arrow } from '../components/Icons.jsx'
 import { motion, useScroll, useTransform, useInView, useSpring, useMotionValueEvent } from 'framer-motion'
 import Lenis from 'lenis'
 import { Mark, Lockup, Rise, Counter, Poster, Img, useRoute, useMagnetic, Clap } from '../components/ui.jsx'
@@ -72,13 +73,13 @@ function Nav({ to, start, returning }) {
   const mag = useMagnetic(0.2)
   return (
     <header className={`l-nav ${solid ? 'solid' : ''} ${hidden ? 'hide' : ''}`}>
-      <Lockup size={22} onClick={() => scrollTo({ top: 0, behavior: 'smooth' })} />
+      <Lockup size={20} onClick={() => scrollTo({ top: 0, behavior: 'smooth' })} />
       <nav className="l-links">
         {[['How it reads', 'reads'], ['The Ticket', 'ticket'], ['The Assembly', 'assembly'], ['The Negative', 'negative']].map(([l, id]) => (
           <button key={id} className="link-spec" onClick={() => to(id)}>{l}</button>
         ))}
       </nav>
-      <button ref={mag} className="btn nav-cta" onClick={start}>{returning ? 'Open Selects' : 'Use beta'}<span className="arr">→</span></button>
+      <button ref={mag} className="btn nav-cta" onClick={start}>{returning ? 'Open Selects' : 'Use beta'}<span className="arr"><Arrow /></span></button>
     </header>
   )
 }
@@ -129,8 +130,8 @@ function Hero({ start }) {
               <span className="pre">letterboxd.com/</span>
               <input value={lb} onChange={(e) => setLb(e.target.value)} placeholder="your-username" autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-label="Letterboxd username" />
             </label>
-            <button className="btn lit hero-go" type="submit">Read me <span className="arr">→</span></button>
-            <button type="button" className="link-spec hero-alt" onClick={() => start('')}>Start without Letterboxd →</button>
+            <button className="btn lit hero-go" type="submit">Read me <span className="arr"><Arrow /></span></button>
+            <button type="button" className="link-spec hero-alt" onClick={() => start('')}>Start without Letterboxd <Arrow /></button>
           </motion.form>
         </div>
       </motion.div>
@@ -227,7 +228,7 @@ function TicketSection() {
     <section id="ticket" className="t-sec">
       <div className="t-copy">
         <Rise as="h2" className="verdict sec-h" text={'Three films.\nOne is a reach.'} />
-        <p className="spec t-hint">{torn ? 'Kept for tonight.' : 'Tear a stub to keep it →'}</p>
+        <p className="spec t-hint">{torn ? 'Kept for tonight.' : <>Tear a stub to keep it <Arrow /></>}</p>
       </div>
       <div className="t-stack">
         {picks.map((p, i) => {
@@ -372,7 +373,7 @@ function Negatives({ start }) {
                   <div className="n-posters">
                     {ids.map((id, k) => <img key={id} src={poster(id)} alt="" style={{ '--k': k }} />)}
                   </div>
-                  <Mark size={44} lit={2} litColour="#efede9" ink="rgba(10,10,11,.85)" className="n-mark" />
+                  <Mark size={40} className="n-mark" />
                 </div>
                 <div className="n-body">
                   <h3 className="n-name">{name}</h3>
@@ -490,9 +491,9 @@ function Final({ start }) {
           <span className="pre">letterboxd.com/</span>
           <input value={lb} onChange={(e) => setLb(e.target.value)} placeholder="your-username" autoCapitalize="none" spellCheck={false} aria-label="Letterboxd username" />
         </label>
-        <button className="btn lit" type="submit">Read me <span className="arr">→</span></button>
+        <button className="btn lit" type="submit">Read me <span className="arr"><Arrow /></span></button>
       </form>
-      <button className="link-spec" onClick={() => start('')}>Start without Letterboxd →</button>
+      <button className="link-spec" onClick={() => start('')}>Start without Letterboxd <Arrow /></button>
     </section>
   )
 }
@@ -500,7 +501,7 @@ function Final({ start }) {
 function Footer({ go }) {
   return (
     <footer className="l-foot">
-      <Lockup size={18} />
+      <Lockup size={20} />
       <span className="spec">Film data from TMDB · not endorsed by TMDB</span>
       <span className="spec">© 2026 Selects</span>
     </footer>

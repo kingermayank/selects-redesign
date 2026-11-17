@@ -6,35 +6,46 @@ import { poster, syncSrc, resolveSrc } from '../lib/films.js'
    THE MARK — five bars, one lit. Everything after the splash is
    these same five bars rearranging.
    ───────────────────────────────────────────────────────────── */
-const BAR = '0,100 14,100 38,0 24,0'
+/* Geometry, from the Figma master (06 Brand kit): a bar is 14 units on a 100-unit
+   height, bars sit on a 24-unit pitch, everything leans 13.5°. Bars are whole: the
+   viewBox is the exact bounding box of the sheared shape, so the mark is centred
+   by construction and nothing is ever cropped. */
+const LEAN = 100 * Math.tan((13.5 * Math.PI) / 180) // 24.0 units over the full height
+const FIVE = { n: 5, w: 14, pitch: 24, lit: 2 } // the mark
+const THREE = { n: 3, w: 23, pitch: 34, lit: 1 } // the icon: below 48px, three bars, never five
+const vbWidth = (g) => (g.n - 1) * g.pitch + g.w + LEAN
+// Layouts move bars away from rest. dx/dy in units; rotation and scaleY pivot on the bar's foot.
 const LAYOUTS = {
-  mark: (i) => ({ x: -10 + i * 20, y: 0, rotate: 0, scaleY: 1 }),
-  open: (i) => ({ x: -10 + i * 20 + 6, y: -22 - i * 3, rotate: -26 - i * 3.5, scaleY: 1 }),
-  wide: (i) => ({ x: -26 + i * 28, y: 0, rotate: 0, scaleY: 1 }),
-  tight: (i) => ({ x: 8 + i * 12, y: 0, rotate: 0, scaleY: 1 }),
-  fan: (i) => ({ x: -10 + i * 20, y: Math.abs(i - 2) * 4, rotate: (i - 2) * 10, scaleY: 1 }),
-  strike: (i) => (i === 2 ? { x: 22, y: 6, rotate: 52, scaleY: 1.18 } : { x: -10 + i * 20, y: 0, rotate: 0, scaleY: 1 }),
-  rise: (i) => ({ x: -10 + i * 20, y: [14, 6, 0, 6, 14][i], rotate: 0, scaleY: [0.72, 0.86, 1, 0.86, 0.72][i] }),
+  mark: () => ({ dx: 0, dy: 0, rotate: 0, scaleY: 1 }),
+  open: (i) => ({ dx: 6, dy: -22 - i * 3, rotate: -26 - i * 3.5, scaleY: 1 }),
+  wide: (i) => ({ dx: (i - 2) * 8, dy: 0, rotate: 0, scaleY: 1 }),
+  tight: (i) => ({ dx: -(i - 2) * 9, dy: 0, rotate: 0, scaleY: 1 }),
+  fan: (i) => ({ dx: 0, dy: Math.abs(i - 2) * 4, rotate: (i - 2) * 10, scaleY: 1 }),
+  strike: (i) => (i === 2 ? { dx: -6, dy: 4, rotate: 52, scaleY: 1.12 } : { dx: 0, dy: 0, rotate: 0, scaleY: 1 }),
+  rise: (i) => ({ dx: 0, dy: 0, rotate: 0, scaleY: [0.62, 0.8, 1, 0.8, 0.62][i] }),
 }
-const BASE_PTS = [[0, 100], [14, 100], [38, 0], [24, 0]]
-// a layout applied to the bar's four corners; pivot is the bar's bottom-left
-function barCoords({ x, y, rotate, scaleY }) {
+function barCoords(g, i, { dx, dy, rotate, scaleY }) {
+  const x0 = i * g.pitch
+  const corners = [[0, 100], [g.w, 100], [g.w + LEAN, 0], [LEAN, 0]]
   const a = (rotate * Math.PI) / 180
   const c = Math.cos(a), s = Math.sin(a)
-  return BASE_PTS.flatMap(([px, py]) => {
+  return corners.flatMap(([px, py]) => {
     const ly = (py - 100) * scaleY
-    return [px * c - ly * s + x, px * s + ly * c + 100 + y]
+    const lx = px + (py - 100) * (scaleY - 1) * -(LEAN / 100) // keep the lean when a bar is shortened
+    return [lx * c - ly * s + x0 + dx, lx * s + ly * c + 100 + dy]
   })
 }
 const toPts = (a) => `${a[0].toFixed(2)},${a[1].toFixed(2)} ${a[2].toFixed(2)},${a[3].toFixed(2)} ${a[4].toFixed(2)},${a[5].toFixed(2)} ${a[6].toFixed(2)},${a[7].toFixed(2)}`
 
-export function Mark({ size = 40, layout = 'mark', lit = 2, litColour = 'var(--select)', ink = 'var(--fg)', clip = true, className = '', style, spring }) {
-  const id = useRef('m' + Math.random().toString(36).slice(2, 8)).current
+/* The mark. `size` is its height in px; width follows the geometry. */
+export function Mark({ size = 40, layout = 'mark', lit, litColour = 'var(--select)', ink = 'var(--fg)', className = '', style, spring, five = false }) {
+  const g = size < 48 && layout === 'mark' && !five ? THREE : FIVE
+  const litAt = lit === undefined ? g.lit : g === THREE && lit === 2 ? 1 : lit
   const L = LAYOUTS[layout] || LAYOUTS.mark
   const polys = useRef([])
   const cur = useRef(null)
-  const targets = [0, 1, 2, 3, 4].map((i) => barCoords(L(i)))
-  if (!cur.current) cur.current = targets.map((t) => t.slice())
+  const targets = Array.from({ length: g.n }, (_, i) => barCoords(g, i, L(i)))
+  if (!cur.current || cur.current.length !== g.n) cur.current = targets.map((t) => t.slice())
   useEffect(() => {
     const from = cur.current.map((a) => a.slice())
     const ctl = animate(0, 1, {
@@ -45,28 +56,23 @@ export function Mark({ size = 40, layout = 'mark', lit = 2, litColour = 'var(--s
       },
     })
     return () => ctl.stop()
-  }, [layout])
+  }, [layout, g.n])
+  const vw = vbWidth(g)
   return (
-    <svg className={className} style={style} width={size} height={size} viewBox="0 0 100 100" aria-hidden="true" overflow="visible">
-      <defs>
-        <clipPath id={id}>
-          {clip ? <rect x="0" y="0" width="100" height="100" /> : <rect x="-140" y="-180" width="380" height="320" />}
-        </clipPath>
-      </defs>
-      <g clipPath={`url(#${id})`}>
-        {[0, 1, 2, 3, 4].map((i) => (
-          <polygon key={i} ref={(el) => (polys.current[i] = el)} points={toPts(cur.current[i])} style={{ fill: i === lit ? litColour : ink, transition: 'fill .45s cubic-bezier(.22,1,.36,1)' }} />
-        ))}
-      </g>
+    <svg className={className} style={{ display: 'block', flex: 'none', ...style }} width={(size * vw) / 100} height={size} viewBox={`0 0 ${vw.toFixed(2)} 100`} aria-hidden="true" overflow="visible">
+      {cur.current.map((pts, i) => (
+        <polygon key={`${g.n}-${i}`} ref={(el) => (polys.current[i] = el)} points={toPts(pts)} style={{ fill: i === litAt ? litColour : ink, transition: 'fill .45s cubic-bezier(.22,1,.36,1)' }} />
+      ))}
     </svg>
   )
 }
 
-export function Lockup({ size = 22, gap = 12, className = '', onClick }) {
+/* Lockup, in the Figma proportions: wordmark cap height 0.55 of the mark, gap 0.375. */
+export function Lockup({ size = 22, className = '', onClick }) {
   return (
-    <button className={`lockup ${className}`} onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap, minHeight: 44 }} aria-label="Selects home">
+    <button className={`lockup ${className}`} onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.375, minHeight: 44 }} aria-label="Selects home">
       <Mark size={size} />
-      <span style={{ fontVariationSettings: "'wdth' 125", fontWeight: 800, fontSize: size * 0.72, letterSpacing: '0.04em' }}>SELECTS</span>
+      <span className="lockup-word" style={{ fontSize: size * 0.78 }}>SELECTS</span>
     </button>
   )
 }
@@ -87,7 +93,7 @@ export function Clap({ size = 120, onDone, delay = 0.25 }) {
       animate={state === 'mark' ? { scale: [1.06, 1], opacity: 1, x: [0, -3, 2, 0] } : { scale: 0.96, opacity: 1 }}
       transition={{ duration: state === 'mark' ? 0.32 : 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Mark size={size} layout={state} clip={state === 'mark'} lit={lit} spring={state === 'mark' ? { type: 'spring', stiffness: 1400, damping: 38 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }} />
+      <Mark size={size} five layout={state} lit={lit} spring={state === 'mark' ? { type: 'spring', stiffness: 1400, damping: 38 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }} />
     </motion.div>
   )
 }

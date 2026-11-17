@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Arrow } from '../components/Icons.jsx'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Lockup, useRoute } from '../components/ui.jsx'
 import { TabIcon } from '../components/Icons.jsx'
@@ -66,7 +67,7 @@ export default function Shell() {
         {s.sample && !s.onboarded && (
           <div className="sample">
             <span className="spec">Sample read</span>
-            <button className="link-spec lit-link" onClick={() => go('start', { wipe: true })}>Make it yours →</button>
+            <button className="link-spec lit-link" onClick={() => go('start', { wipe: true })}>Make it yours <Arrow /></button>
           </div>
         )}
         <AnimatePresence mode="wait" initial={false}>

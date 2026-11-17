@@ -14,7 +14,14 @@ function Routes() {
 
 export default function App() {
   const [ready, setReady] = useState(false)
-  useEffect(() => { loadFilms().then(() => setReady(true)) }, [])
+  useEffect(() => {
+    // Nothing paints until both faces are in: no fallback face ever shows. Capped so a slow network still renders.
+    const faces = document.fonts
+      ? Promise.all(['400 16px "Archivo"', '800 16px "Archivo"', '400 12px "Martian Mono"', '600 12px "Martian Mono"'].map((f) => document.fonts.load(f))).catch(() => {})
+      : Promise.resolve()
+    const capped = Promise.race([faces, new Promise((r) => setTimeout(r, 2500))])
+    Promise.all([loadFilms(), capped]).then(() => setReady(true))
+  }, [])
   return (
     <Router>
       {ready ? (

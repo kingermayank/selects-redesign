@@ -74,3 +74,12 @@ export function TabIcon({ name, on = false, size = 22 }) {
   const C = MAP[name]
   return C ? <C on={on} size={size} /> : null
 }
+
+/* Arrow: neither face ships an arrow glyph, so it is drawn. Sized in em, coloured by the text it sits in. */
+export function Arrow({ dir = 'right', className = '' }) {
+  return (
+    <svg className={`arrow ${className}`} viewBox="0 0 16 10" width="1.1em" height="0.69em" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true" style={{ transform: dir === 'left' ? 'scaleX(-1)' : undefined }}>
+      <path d="M1 5H14.2M10 1.2L14 5L10 8.8" />
+    </svg>
+  )
+}
