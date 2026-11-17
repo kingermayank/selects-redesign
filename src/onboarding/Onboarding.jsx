@@ -138,7 +138,7 @@ function Name({ s, next }) {
           </label>
         </form>
       </div>
-      <CTA label={v.trim() ? `Print it, ${v.trim().split(' ')[0]}` : 'Type a name'} onClick={save} disabled={!v.trim()} />
+      <CTA label="Print my ticket" onClick={save} disabled={!v.trim()} />
     </div>
   )
 }
@@ -359,7 +359,7 @@ function Hour({ s, next }) {
           <motion.p key={line} className="dial-line" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>{line}</motion.p>
         </AnimatePresence>
       </div>
-      <CTA label={`Lights down at ${label} ${ampm}`} onClick={save} />
+      <CTA label="Continue" onClick={save} />
     </div>
   )
 }
