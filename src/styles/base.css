@@ -127,7 +127,7 @@ a { color: inherit; text-decoration: none; }
   .btn:hover { color: var(--base); }
 }
 .btn:active { transform: scale(0.97); }
-.btn[disabled] { opacity: 0.32; pointer-events: none; }
+.btn[disabled] { background: var(--base-3); color: var(--fg-3); box-shadow: inset 0 0 0 1px var(--line); pointer-events: none; }
 .btn.ghost { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1px var(--line-2); }
 .btn.ghost::after { background: var(--fg); }
 @media (hover: hover) { .btn.ghost:hover { color: var(--base); } }
@@ -146,6 +146,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ── fields ───────────────────────────────────────────────── */
 .field {
+  min-width: 0;
   display: flex; align-items: center;
   height: 52px; padding: 0 16px;
   background: var(--base-2);

@@ -246,7 +246,7 @@ function TicketSection() {
           const f = film(p.id)
           if (!f) return null
           return (
-            <motion.div key={p.id} initial={{ opacity: 0, x: 60, rotate: 3 }} whileInView={{ opacity: 1, x: 0, rotate: 0 }} viewport={{ once: true, margin: '-15%' }} transition={{ duration: 1.1, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }} style={{ marginLeft: `${i * 6}%` }}>
+            <motion.div key={p.id} initial={{ opacity: 0, x: 60, rotate: 3 }} whileInView={{ opacity: 1, x: 0, rotate: 0 }} viewport={{ once: true, margin: '-15%' }} transition={{ duration: 1.1, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }} style={{ paddingLeft: `${i * 6}%` }}>
               <Ticket f={f} why={p.why} slot={p.slot} index={i} onTear={() => setTorn((n) => n + 1)} size="l" />
             </motion.div>
           )
