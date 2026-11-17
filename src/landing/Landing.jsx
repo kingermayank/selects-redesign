@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform, useInView, useSpring, useMotionValueEv
 import Lenis from 'lenis'
 import { Mark, Lockup, Rise, Counter, Poster, Img, useRoute, useMagnetic, Clap } from '../components/ui.jsx'
 import Ticket from '../components/Ticket.jsx'
+import { TabIcon } from '../components/Icons.jsx'
 import Assembly from '../components/Assembly.jsx'
 import { film, films, backdrop, poster, colour, logo, fmtRuntime, ids as byTitles } from '../lib/films.js'
 import { yourColour, ARCHETYPES } from '../lib/taste.js'
@@ -112,15 +113,12 @@ function Hero({ start }) {
       </div>
       <div className="hero-vignette" />
       <motion.div className="hero-copy" style={{ y: textY, opacity: textO }}>
-        <motion.p className="spec hero-kicker" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2, duration: 1 }}>
-          <span className="rec" /> Invite only · for now · Rev C
-        </motion.p>
         <h1 className="verdict hero-h">
           <Rise text={'The take\nworth keeping.'} delay={0.35} stagger={0.09} />
         </h1>
         <div className="hero-row">
           <motion.p className="lead hero-lead" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 1, ease: [0.16, 1, 0.3, 1] }}>
-            Selects reads every film you have logged and hands you three worth tonight. Not a feed. A ticket.
+            Three films for tonight, read from your diary.
           </motion.p>
           <motion.form
             className="hero-form"
@@ -132,14 +130,12 @@ function Hero({ start }) {
               <input value={lb} onChange={(e) => setLb(e.target.value)} placeholder="your-username" autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-label="Letterboxd username" />
             </label>
             <button className="btn lit hero-go" type="submit">Read me <span className="arr">→</span></button>
-            <button type="button" className="link-spec hero-alt" onClick={() => start('')}>No Letterboxd? Start with one film →</button>
+            <button type="button" className="link-spec hero-alt" onClick={() => start('')}>Start without Letterboxd →</button>
           </motion.form>
         </div>
       </motion.div>
       <motion.div className="hero-foot" style={{ opacity: textO }}>
-        <span className="spec">Move to develop</span>
         <span className="hero-scroll"><i /></span>
-        <span className="spec">01 / 09</span>
       </motion.div>
     </section>
   )
@@ -173,16 +169,11 @@ function Manifesto() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.75', 'end 0.6'] })
   const parts = [
-    'Your', 'diary', 'is', 'the', 'most', 'honest', 'review', 'you', 'have', 'ever', 'written.', { p: 949 }, { p: 843 },
-    'Selects', 'reads', 'every', 'film', 'in', 'it,', 'every', 'star,', 'every', 'night', 'you', 'gave', 'up', 'at', 'minute', 'forty,', { p: 1398 },
-    'and', 'works', 'out', 'what', 'you', 'were', 'actually', 'there', 'for.', 'Then', 'it', 'hands', 'you', 'three.', { p: 655 },
+    'Your', 'diary', 'is', 'the', 'most', 'honest', 'review', 'you', 'have', 'written.', { p: 949 }, { p: 843 },
+    'Selects', 'reads', 'it', { p: 1398 }, 'and', 'hands', 'you', 'three.', { p: 655 },
   ]
   return (
     <section id="reads" className="manifesto" ref={ref}>
-      <div className="m-head">
-        <span className="spec lit">02 · How it reads</span>
-        <span className="spec">Precise about craft. Casual in register.</span>
-      </div>
       <p className="m-text">
         {parts.map((w, i) => (
           <Word key={i} i={i} n={parts.length} w={w} progress={scrollYProgress} />
@@ -191,9 +182,8 @@ function Manifesto() {
       <div className="m-stats">
         {[
           [4, 's', 'to read your last fifty'],
-          [856, '', 'films in an average diary we read'],
-          [3, '', 'films a day. Never a feed.'],
-          [1, '', 'of them is always a reach'],
+          [3, '', 'films a day'],
+          [1, '', 'always a reach'],
         ].map(([n, suf, l], i) => (
           <div key={i} className="m-stat">
             <span className="numeral"><Counter to={n} duration={1.6 + i * 0.2} />{suf}</span>
@@ -236,10 +226,8 @@ function TicketSection() {
   return (
     <section id="ticket" className="t-sec">
       <div className="t-copy">
-        <span className="spec lit">03 · The Ticket</span>
         <Rise as="h2" className="verdict sec-h" text={'Three films.\nOne is a reach.'} />
-        <p className="lead">Every morning Selects prints a ticket: two films close to everything you kept, and one that is not. The reach is how your taste grows instead of looping.</p>
-        <p className="spec t-hint">{torn ? `${torn} kept for tonight. That is the whole interaction.` : 'Drag a stub to tear it. That is how you keep one for tonight.'}</p>
+        <p className="spec t-hint">{torn ? 'Kept for tonight.' : 'Tear a stub to keep it →'}</p>
       </div>
       <div className="t-stack">
         {picks.map((p, i) => {
@@ -289,10 +277,8 @@ function StripSection() {
     <section className="s-sec">
       <div className="s-head">
         <div>
-          <span className="spec lit">04 · The Strip</span>
           <Rise as="h2" className="verdict sec-h" text={'Everything you have\nlogged, as one strip.'} />
         </div>
-        <p className="lead s-lead">Each bar carries the colour of the film you watched. A year reads like a print: warm in summer, blue in the weeks you could not sleep.</p>
       </div>
       <div className="s-stage">
         <div className="s-readout">
@@ -305,7 +291,7 @@ function StripSection() {
               </div>
             </motion.div>
           ) : (
-            <span className="spec">{N} films · 1927 → 2026 · hover or drag across the strip</span>
+            <span className="spec">Each bar, a film in its own colour</span>
           )}
         </div>
         <div
@@ -334,16 +320,10 @@ function AssemblySection() {
   return (
     <section id="assembly" className="a-sec">
       <div className="a-copy">
-        <span className="spec lit">05 · The Assembly</span>
         <Rise as="h2" className="verdict sec-h" text={'Your taste, as the\npeople who made it.'} />
-        <p className="lead">Mann to Spinotti to four films you did not know were connected. Every line is a person. Drag a star and the whole constellation answers.</p>
       </div>
       <div className="a-stage">
         <Assembly ids={all} you="#3A6E85" height={'100%'} />
-        <div className="a-legend spec">
-          <span><i style={{ background: '#3A6E85' }} /> You · #3A6E85</span>
-          <span>Line · shared director, DP, composer or lead</span>
-        </div>
       </div>
     </section>
   )
@@ -378,10 +358,9 @@ function Negatives({ start }) {
       <div className="n-sticky">
         <div className="n-head">
           <div>
-            <span className="spec lit">06 · The Negative</span>
             <Rise as="h2" className="verdict sec-h" text={'Every print comes\nfrom a negative.'} />
           </div>
-          <p className="lead">Eight shapes a taste can take. Selects tells you yours in under a minute, gives it a colour, and lets it change.</p>
+          <p className="lead">Eight tastes. Find yours.</p>
         </div>
         <motion.div className="n-track" ref={track} style={{ x: xs }}>
           {entries.map(([name, a], i) => {
@@ -396,10 +375,8 @@ function Negatives({ start }) {
                   <Mark size={44} lit={2} litColour="#efede9" ink="rgba(10,10,11,.85)" className="n-mark" />
                 </div>
                 <div className="n-body">
-                  <span className="spec">{String(i + 1).padStart(2, '0')} / 08</span>
                   <h3 className="n-name">{name}</h3>
                   <p>{a.line}</p>
-                  <span className="spec n-hex"><i style={{ background: c }} /> Colour {c}</span>
                 </div>
               </article>
             )
@@ -420,9 +397,7 @@ function Devices() {
   return (
     <section className="d-sec" ref={ref}>
       <div className="d-copy">
-        <span className="spec lit">07 · Pocket and desk</span>
         <Rise as="h2" className="verdict sec-h" text={'In your pocket\nat 9:40 pm.'} />
-        <p className="lead">The ticket lives on your phone, where the decision gets made. The Assembly and the Strip open up on a big screen, where you can actually wander.</p>
       </div>
       <div className="d-stage">
         <motion.div className="d-desk" style={{ y: dy }}>
@@ -430,7 +405,7 @@ function Devices() {
           <div className="d-screen">
             <aside className="d-rail">
               <Mark size={18} />
-              {['Home', 'Hunt', 'Library', 'You'].map((x, i) => <span key={x} className={`spec ${i === 3 ? 'on' : ''}`}>{x}</span>)}
+              {['Home', 'Hunt', 'Library', 'You'].map((x, i) => <span key={x} className={`spec d-ri ${i === 3 ? 'on' : ''}`}><TabIcon name={x.toLowerCase()} on={i === 3} size={12} />{x}</span>)}
             </aside>
             <div className="d-main">
               <span className="spec">You · the negative</span>
@@ -453,7 +428,7 @@ function Devices() {
                 <b>{f.t}</b>
               </div>
             ))}
-            <div className="d-tabs">{['Home', 'Hunt', 'Library', 'You'].map((x, i) => <span key={x} className={i === 0 ? 'on' : ''}><i className="bar-atom" />{x}</span>)}</div>
+            <div className="d-tabs">{['Home', 'Hunt', 'Library', 'You'].map((x, i) => <span key={x} className={i === 0 ? 'on' : ''}><TabIcon name={x.toLowerCase()} on={i === 0} size={15} />{x}</span>)}</div>
           </div>
         </motion.div>
       </div>
@@ -463,13 +438,13 @@ function Devices() {
 
 /* ── VOCABULARY ────────────────────────────────────────────── */
 const VOCAB = [
-  ['The Ticket', 'Your daily three. Two close, one reach.', 'Thief'],
-  ['The Strip', 'Everything you have logged, zoomable, in colour.', 'In the Mood for Love'],
-  ['The Assembly', 'Your taste as a graph of the people who made it.', 'Collateral'],
-  ['The Wallet', 'The ten films closest to you. Shareable.', 'Le Samouraï'],
-  ['The Rabbit Hole', 'One person, every film. Spinotti, all night.', 'The Insider'],
-  ['The Print', 'A still worth sharing, set in your colour.', 'Drive'],
-  ['The Cut', 'Your month as a slate trailer. Earned, not given.', 'Blade Runner 2049'],
+  ['The Ticket', 'Your daily three', 'Thief'],
+  ['The Strip', 'Everything you logged', 'In the Mood for Love'],
+  ['The Assembly', 'Your taste, as people', 'Collateral'],
+  ['The Wallet', 'Your closest ten', 'Le Samouraï'],
+  ['The Rabbit Hole', 'One person, every film', 'The Insider'],
+  ['The Print', 'Your card to share', 'Drive'],
+  ['The Cut', 'Your month as a trailer', 'Blade Runner 2049'],
 ]
 function Vocabulary() {
   const [hov, setHov] = useState(-1)
@@ -482,8 +457,7 @@ function Vocabulary() {
   return (
     <section className="v-sec" onPointerMove={onMove}>
       <div className="v-head">
-        <span className="spec lit">08 · Vocabulary</span>
-        <Rise as="h2" className="verdict sec-h" text={'Everything is named\nfrom the cutting room.'} />
+        <Rise as="h2" className="verdict sec-h" text={'Named from the\ncutting room.'} />
       </div>
       <ul className="v-list">
         {VOCAB.map(([k, d], i) => (
@@ -511,7 +485,6 @@ function Final({ start }) {
     <section className="f-sec" ref={ref}>
       <div className="f-mark">{inView ? <Clap size={132} delay={0.1} /> : <div style={{ height: 132 }} />}</div>
       <Rise as="h2" className="verdict f-h" text={'Bring your diary.'} />
-      <p className="lead f-lead">Four seconds to read your last fifty. One minute to find your negative. Tonight’s ticket is already printing.</p>
       <form className="f-form" onSubmit={(e) => { e.preventDefault(); start(lb) }}>
         <label className="field">
           <span className="pre">letterboxd.com/</span>
@@ -519,7 +492,7 @@ function Final({ start }) {
         </label>
         <button className="btn lit" type="submit">Read me <span className="arr">→</span></button>
       </form>
-      <button className="link-spec" onClick={() => start('')}>Or start with one film →</button>
+      <button className="link-spec" onClick={() => start('')}>Start without Letterboxd →</button>
     </section>
   )
 }
@@ -528,8 +501,7 @@ function Footer({ go }) {
   return (
     <footer className="l-foot">
       <Lockup size={18} />
-      <span className="spec">Invite only. For now.</span>
-      <span className="spec">Film data and imagery from TMDB. Selects is not endorsed by TMDB.</span>
+      <span className="spec">Film data from TMDB · not endorsed by TMDB</span>
       <span className="spec">© 2026 Selects</span>
     </footer>
   )

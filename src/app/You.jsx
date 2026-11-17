@@ -24,7 +24,6 @@ export default function You({ arch }) {
         <div className="you-id">
           <span className="you-av" style={{ background: c }}>{(s.name || 'Y').slice(0, 1).toUpperCase()}</span>
           <div>
-            <span className="spec">You · the negative</span>
             <h1 className="you-name">{s.name || 'You'}</h1>
           </div>
         </div>
@@ -42,7 +41,7 @@ export default function You({ arch }) {
       </header>
 
       <section className="you-assembly">
-        <div className="row-head"><div><span className="spec lit">The Assembly</span><h3 className="row-title">{th ? `${th.who} is the thread` : 'Your constellation'}</h3></div><span className="spec">drag a star · tap to open</span></div>
+        <div className="row-head"><h3 className="row-title">The Assembly</h3>{th && <span className="spec">Thread · {th.who}</span>}</div>
         <div className="ya-stage">
           <Assembly ids={[...s.positive, ...reads]} you={c} height={'100%'} youLabel={(s.name || 'YOU').toUpperCase()} onOpen={(f) => go(`film-${f.id}`)} />
         </div>
@@ -59,7 +58,7 @@ export default function You({ arch }) {
       </section>
 
       <section className="print-sec">
-        <div className="row-head"><div><span className="spec">The Print</span><h3 className="row-title">Your negative, printed</h3></div></div>
+        <div className="row-head"><h3 className="row-title">The Print</h3></div>
         <div className="print-wrap">
           <motion.div className="print" whileHover={{ rotate: -1.2, y: -6 }} transition={{ type: 'spring', stiffness: 200, damping: 18 }}>
             <div className="print-field">
@@ -73,7 +72,6 @@ export default function You({ arch }) {
             </div>
           </motion.div>
           <div className="print-side">
-            <p className="lead">One card, set in your colour. Post it, send it, let someone argue with it.</p>
             <button className="btn" onClick={copy}>{copied ? 'Copied' : 'Copy the line'} <span className="arr">→</span></button>
             <code className="print-line">{line}</code>
           </div>

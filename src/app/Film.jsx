@@ -58,14 +58,14 @@ export default function Film({ id }) {
               <Bars value={match / 20} size={34} />
               <span className="numeral ss-n">{match}</span>
             </div>
-            <p className="ss-why">Sixty percent the room, forty percent you. {entry ? reason(entry) : s.positive.includes(id) ? 'You kept this one. It is part of your floor.' : ''}</p>
+            <p className="ss-why">{entry ? reason(entry) : s.positive.includes(id) ? 'You kept this one.' : ''}</p>
           </section>
 
           <div className="film-actions">
             <button className={`btn ${kept ? 'ghost' : 'lit'}`} onClick={() => { tick(12); setState((st) => ({ kept: [...new Set([...(st.kept || []), id])] })) }} disabled={kept}>{kept ? 'Kept' : 'Keep for tonight'} <span className="arr">→</span></button>
             <button className={`btn ghost ${inList ? 'on' : ''}`} onClick={() => { tick(6); toggleIn('watchlist', id) }}>{inList ? 'On the watchlist' : 'Watchlist'}</button>
             <div className="log">
-              <span className="spec">{rated ? 'Logged · tap to re-rate' : 'Log it · rate in bars'}</span>
+              <span className="spec">{rated ? 'Logged' : 'Rate'}</span>
               <Bars value={rated} size={22} onChange={log} />
             </div>
           </div>
@@ -76,7 +76,7 @@ export default function Film({ id }) {
             {people.map(([k, v]) => (
               <div key={k} className="person-row">
                 <span className="spec">{k}</span>
-                <span>{v.map((p, i) => <button key={p} className="person" onClick={() => { setState({ huntQuery: p }); go('hunt') }}>{p}{i < v.length - 1 ? ', ' : ''}</button>)}</span>
+                <span>{v.map((p, i) => <span key={p}><button className="person" onClick={() => { setState({ huntQuery: p }); go('hunt') }}>{p}</button>{i < v.length - 1 ? ', ' : ''}</span>)}</span>
               </div>
             ))}
             <div className="person-row"><span className="spec">Cast</span><span className="cast">{f.cast.slice(0, 6).map((p, i) => <span key={p}><button className="person" onClick={() => { setState({ huntQuery: p }); go('hunt') }}><b>{p}</b></button>{f.roles[i] ? <em> as {f.roles[i]}</em> : null}</span>)}</span></div>
@@ -84,13 +84,13 @@ export default function Film({ id }) {
         </div>
 
         <aside className="film-dna">
-          <div className="row-head"><div><span className="spec">DNA</span><h3 className="row-title">Who it shares people with</h3></div></div>
+          <div className="row-head"><h3 className="row-title">DNA</h3></div>
           <div className="dna-stage"><Assembly ids={dna} you={c} height={'100%'} youLabel={f.t.toUpperCase()} onOpen={(x) => go(`film-${x.id}`)} intro={false} /></div>
           <div className="film-kw">{f.k.slice(0, 10).map((k) => <span key={k} className="chip">{k}</span>)}</div>
         </aside>
       </div>
 
-      <Row kicker="More like this" title={`If ${f.t} landed`} items={more} />
+      <Row title="More like this" items={more} />
     </article>
   )
 }

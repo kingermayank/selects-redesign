@@ -24,24 +24,23 @@ export default function Library() {
   return (
     <div className="library">
       <header className="page-head">
-        <span className="spec">Library</span>
         <h1 className="verdict page-h">Everything you have kept.</h1>
       </header>
 
       <section className="lib-strip" onPointerLeave={() => setHov(-1)}>
-        <div className="row-head"><span className="spec">The Strip · {strip.length} films</span><span className="spec">{hov >= 0 && strip[hov] ? strip[hov].t : 'every bar is a film, in its own colour'}</span></div>
+        <div className="row-head"><h3 className="row-title">The Strip</h3><span className="spec">{hov >= 0 && strip[hov] ? strip[hov].t : ''}</span></div>
         <div className="ls-row">
           {strip.map((f, i) => (
             <motion.button key={f.id} className="ls-bar" onPointerEnter={() => setHov(i)} onClick={() => go(`film-${f.id}`)} style={{ '--c': colour(f) }} animate={{ flexGrow: hov === i ? 6 : hov >= 0 && Math.abs(hov - i) === 1 ? 2.2 : 1 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} aria-label={f.t}>
               <img src={poster(f.id)} alt="" style={{ opacity: hov === i ? 1 : 0 }} />
             </motion.button>
           ))}
-          {!strip.length && <span className="spec">Your strip starts with the first film you keep.</span>}
+          {!strip.length && <span className="spec">Empty</span>}
         </div>
       </section>
 
       <section className="wallet">
-        <div className="row-head"><div><span className="spec">The Wallet</span><h3 className="row-title">Ten films closest to you</h3></div><span className="spec">hover to fan</span></div>
+        <div className="row-head"><h3 className="row-title">The Wallet</h3></div>
         <div className="wallet-fan">
           {wallet.map((f, i) => (
             <button key={f.id} className="wf-card" style={{ '--i': i, '--n': wallet.length, '--film': colour(f) }} onClick={() => go(`film-${f.id}`)} data-cursor="OPEN">
@@ -61,7 +60,6 @@ export default function Library() {
           ))}
         </LayoutGroup>
       </div>
-      <p className="spec seg-sub">{tabs[tab][1]}</p>
       <AnimatePresence mode="wait">
         <motion.div key={tab} className="lib-grid" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
           {list.map((f) => {
@@ -74,7 +72,7 @@ export default function Library() {
               </button>
             )
           })}
-          {!list.length && <div className="empty-card"><span className="spec">Nothing here yet.</span><p>{tab === 1 ? 'Save a film from its page and it waits here for the right night.' : tab === 2 ? 'Log a film from its page. Rate it in bars.' : 'Nothing struck. Generous of you.'}</p><button className="btn ghost" onClick={() => go('hunt')}>Hunt a film →</button></div>}
+          {!list.length && <div className="empty-card"><span className="spec">Nothing yet</span><button className="btn ghost" onClick={() => go('hunt')}>Hunt a film →</button></div>}
         </motion.div>
       </AnimatePresence>
     </div>

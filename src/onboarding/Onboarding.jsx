@@ -72,7 +72,7 @@ function Q({ layout, kicker, title, sub, children, lit = true }) {
   return (
     <div className="q">
       <div className="q-mark"><Mark size={64} layout={layout} lit={2} /></div>
-      <p className={`spec ${lit ? 'lit' : ''}`}>{kicker}</p>
+      {kicker && <p className={`spec ${lit ? 'lit' : ''}`}>{kicker}</p>}
       <h1 className="q-h">{title}</h1>
       {sub && <p className="spec q-sub">{sub}</p>}
       {children}
@@ -117,7 +117,7 @@ function Name({ s, next }) {
   const shown = (v.trim() || 'YOUR NAME').toUpperCase()
   return (
     <div className="ob-split">
-      <Q layout="mark" kicker="Before the lights go down" title="What should the ticket say?" sub="First name is plenty. It goes on every stub." />
+      <Q layout="mark" title="What should the ticket say?" />
       <div className="ob-right center">
         <motion.div className="name-ticket" initial={{ rotate: -4, y: 30, opacity: 0 }} animate={{ rotate: -2.5, y: 0, opacity: 1 }} transition={{ delay: 0.2, type: 'spring', stiffness: 120, damping: 16 }}>
           <div className="nt-l">
@@ -160,7 +160,7 @@ function Positive({ s, next }) {
   }
   return (
     <div className="ob-split wall-split">
-      <Q layout="wide" kicker="Building · positive profile" title="If you could rent a theatre and watch one film in it forever, what is it?" sub={picks.length ? 'Re-sorted around your pick. Add up to five.' : 'Trending, classics, the odd reach. Or search any film.'}>
+      <Q layout="wide" title="If you could rent a theatre and watch one film in it forever, what is it?">
         <Tray ids={picks} onRemove={toggle} />
       </Q>
       <div className="ob-right">
@@ -183,7 +183,7 @@ function Negative({ s, next }) {
   }
   return (
     <div className="ob-split wall-split">
-      <Q layout="strike" kicker="Building · negative profile" title="What did everyone love that never landed for you?" sub="High recognition, regionally weighted. A dislike is only useful if most people loved it.">
+      <Q layout="strike" title="What did everyone love that never landed for you?">
         <div className="struck-list">
           {s.negative.map((id) => film(id)).filter(Boolean).map((f) => (
             <motion.button key={f.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="struck-chip" onClick={() => toggle(f.id)}>{f.t}<span>×</span></motion.button>
@@ -212,7 +212,6 @@ function Search({ value, onChange, placeholder }) {
 function Wall({ list, picked, onPick, kind, label }) {
   return (
     <div className="wall-wrap">
-      <div className="wall-head"><span className="spec">{label}</span><span className="spec">{picked.length} {kind === 'negative' ? 'struck' : 'picked'}</span></div>
       <LayoutGroup>
         <div className="wall">
           {list.map((f, i) => {
@@ -244,7 +243,7 @@ function Wall({ list, picked, onPick, kind, label }) {
           })}
         </div>
       </LayoutGroup>
-      {!list.length && <p className="spec" style={{ padding: '40px 0' }}>Nothing on file for that. Try a director.</p>}
+      {!list.length && <p className="spec" style={{ padding: '40px 0' }}>No match.</p>}
     </div>
   )
 }
@@ -285,7 +284,7 @@ function Neutral({ s, next }) {
   const toggle = (v) => { tick(8); setState((st) => ({ axes: st.axes.includes(v) ? st.axes.filter((x) => x !== v) : [...st.axes.filter((x) => (v === 'both' ? false : x !== 'both')), v] })) }
   return (
     <div className="ob-split">
-      <Q layout="fan" kicker="Building · neutral profile" title="What are you actually there for?" sub="Pick as many as are true." />
+      <Q layout="fan" title="What are you actually there for?" sub="Pick any." />
       <div className="ob-right center">
         <div className="axes">
           {AXES.map((a, i) => {
@@ -332,7 +331,7 @@ function Hour({ s, next }) {
   return (
     <div className="ob-split" style={{ '--sky': sky }}>
       <div className="hour-sky" style={{ background: `radial-gradient(80% 60% at 50% 100%, hsl(${22 - sky * 230} ${70 - sky * 30}% ${32 - sky * 22}% / ${0.55 - sky * 0.2}), transparent 70%)` }} />
-      <Q layout="rise" kicker="Building · the hour" title="When do the lights usually go down?" sub="Drag the dial. It changes what the ticket prints." />
+      <Q layout="rise" title="When do the lights usually go down?" />
       <div className="ob-right center">
         <div className="dial" ref={ref} onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); setFromPointer(e) }} onPointerMove={(e) => e.buttons && setFromPointer(e)} data-cursor="DRAG" role="slider" aria-valuemin={12} aria-valuemax={27} aria-valuenow={12 + h} aria-valuetext={`${label} ${ampm}`} tabIndex={0} onKeyDown={(e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setH((x) => clamp(x + 0.25)); if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setH((x) => clamp(x - 0.25)) }}>
           <svg viewBox="0 0 300 300" className="dial-svg" aria-hidden="true">
@@ -371,11 +370,11 @@ function Import({ s, next }) {
   const link = () => { if (!u.trim()) return; tick(12); setState({ letterboxd: u.trim().replace(/^@/, '') }); setLinked(true) }
   return (
     <div className="ob-split">
-      <Q layout="tight" kicker="Optional · strongly recommended" title="I can read your last fifty in four seconds." sub="Your username is enough. Everything you have logged becomes the floor your recommendations start from." lit={false} />
+      <Q layout="tight" kicker="Optional" title="I can read your last fifty in four seconds." lit={false} />
       <div className="ob-right center">
         <div className="imp">
           <div className="imp-tile main">
-            <div className="imp-row"><b>Letterboxd</b>{linked ? <motion.span className="spec lit" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}>● Linked</motion.span> : <span className="spec">username or the export</span>}</div>
+            <div className="imp-row"><b>Letterboxd</b>{linked && <motion.span className="spec lit" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}>● Linked</motion.span>}</div>
             <form className="imp-form" onSubmit={(e) => { e.preventDefault(); link() }}>
               <label className="field">
                 <span className="pre">letterboxd.com/</span>
@@ -383,13 +382,6 @@ function Import({ s, next }) {
               </label>
               <button className="btn ghost" type="submit" disabled={!u.trim() || linked}>{linked ? 'Linked' : 'Link'}</button>
             </form>
-            <p className="spec imp-note">{linked ? `@${u.replace(/^@/, '')} is linked. Your diary syncs in the background once you are in; tonight’s read starts from your picks.` : 'The public feed carries your last fifty. Drop the export later for everything.'}</p>
-          </div>
-          <div className="imp-more">
-            <span className="spec">Also reads</span>
-            {[['IMDb', 'ratings.csv'], ['Notes', 'a pasted list'], ['Screenshots', 'posters, any app']].map(([t, sub]) => (
-              <span key={t} className="imp-chip"><b>{t}</b> <span className="spec">{sub}</span></span>
-            ))}
           </div>
         </div>
       </div>
@@ -429,10 +421,6 @@ function Reading({ s, next }) {
       ) : (
         <canvas ref={cv} className="reading-cv" />
       )}
-      <div className="reading-top">
-        <span className="spec lit">Reading</span>
-        <span className="spec">The only honest loading screen</span>
-      </div>
       <div className="reading-big">
         <span className="numeral">{n}</span>
         <span className="spec">films read</span>
@@ -459,7 +447,7 @@ function Reveal({ s, next }) {
         <Assembly ids={[...s.positive, ...reads]} you={c} height={'100%'} youLabel={(s.name || 'YOU').toUpperCase()} />
       </div>
       <div className="reveal-copy">
-        <p className="spec">The negative · struck from {s.positive.length + s.negative.length + reads.length} films · it will change</p>
+        <p className="spec">Your negative</p>
         <h1 className="reveal-name fit" aria-label={a.name} style={{ '--n': a.name.length }}>
           {a.name.split('').map((ch, i) => (
             <motion.span key={i} initial={{ opacity: 0, y: '0.4em', filter: 'blur(10px)' }} animate={stage >= 1 ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}} transition={{ delay: i * 0.045, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>{ch}</motion.span>
@@ -469,9 +457,7 @@ function Reveal({ s, next }) {
         <motion.div className="reveal-meta" initial={{ opacity: 0, y: 10 }} animate={stage >= 2 ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.25, duration: 0.8 }}>
           <span className="swatch" style={{ background: c }} />
           <div><span className="spec">Your colour</span><b className="numeral">{c}</b></div>
-          <div className="reveal-tell"><span className="spec">The tell</span><span>{a.tell}</span></div>
         </motion.div>
-        <p className="spec reveal-hint">Oklab average of every poster you kept · long-press to share</p>
       </div>
       <CTA label="Insights" onClick={next} />
     </div>
@@ -485,7 +471,6 @@ function Insights({ s, next }) {
   return (
     <div className="ins" style={{ '--you': c }}>
       <div className="ins-head">
-        <p className="spec">Insights · {list.length} reads</p>
         <h1 className="q-h">{s.name ? `${s.name.split(' ')[0]}, here is what I read.` : 'Here is what I read.'}</h1>
         <div className="ins-bars">{list.map((x, i) => <i key={i} className="bar-atom" style={{ color: x.sharp ? 'var(--select)' : 'var(--fg-3)' }} />)}</div>
       </div>

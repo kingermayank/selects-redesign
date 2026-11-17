@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mark, Lockup, useRoute } from '../components/ui.jsx'
+import { Lockup, useRoute } from '../components/ui.jsx'
+import { TabIcon } from '../components/Icons.jsx'
 import { useStore, setState, getState } from '../lib/store.js'
 import { yourColour, archetype } from '../lib/taste.js'
 import { ids as byTitles } from '../lib/films.js'
@@ -12,10 +13,10 @@ import Film from './Film.jsx'
 import './app.css'
 
 const TABS = [
-  { id: 'home', label: 'Home', icon: 'mark' },
-  { id: 'hunt', label: 'Hunt', icon: 'tight' },
-  { id: 'library', label: 'Library', icon: 'rise' },
-  { id: 'you', label: 'You', icon: 'fan' },
+  { id: 'home', label: 'Home' },
+  { id: 'hunt', label: 'Hunt' },
+  { id: 'library', label: 'Library' },
+  { id: 'you', label: 'You' },
 ]
 
 export default function Shell() {
@@ -41,7 +42,7 @@ export default function Shell() {
         <nav className="rail-nav">
           {TABS.map((t) => (
             <button key={t.id} className={`rail-item ${tab === t.id && !filmId ? 'on' : ''}`} onClick={() => go(t.id)}>
-              <Mark size={18} layout={tab === t.id ? t.icon : 'mark'} lit={tab === t.id ? 2 : -1} ink={tab === t.id ? 'var(--fg)' : 'var(--fg-4)'} />
+              <TabIcon name={t.id} on={tab === t.id && !filmId} size={20} />
               <span>{t.label}</span>
               {tab === t.id && !filmId && <motion.i layoutId="rail-lit" className="rail-lit" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
             </button>
@@ -64,7 +65,7 @@ export default function Shell() {
       <main className="app-main">
         {s.sample && !s.onboarded && (
           <div className="sample">
-            <span className="spec">This is a sample read built from three films.</span>
+            <span className="spec">Sample read</span>
             <button className="link-spec lit-link" onClick={() => go('start', { wipe: true })}>Make it yours →</button>
           </div>
         )}
@@ -83,7 +84,7 @@ export default function Shell() {
       <nav className="tabbar" aria-label="Main">
         {TABS.map((t) => (
           <button key={t.id} className={`tab ${tab === t.id ? 'on' : ''}`} onClick={() => go(t.id)} aria-current={tab === t.id ? 'page' : undefined}>
-            <Mark size={20} layout={tab === t.id ? t.icon : 'mark'} lit={tab === t.id ? 2 : -1} ink={tab === t.id ? 'var(--fg)' : 'var(--fg-4)'} />
+            <TabIcon name={t.id} on={tab === t.id} size={24} />
             <span>{t.label}</span>
             {tab === t.id && <motion.i layoutId="tab-lit" className="tab-lit" transition={{ type: 'spring', stiffness: 520, damping: 38 }} />}
           </button>

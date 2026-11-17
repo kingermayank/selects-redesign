@@ -36,7 +36,6 @@ export default function Hunt() {
   return (
     <div className="hunt">
       <header className="page-head">
-        <span className="spec">Hunt</span>
         <h1 className="verdict page-h">Hunt a film.</h1>
       </header>
       <label className="field hunt-search">
@@ -53,7 +52,7 @@ export default function Hunt() {
       <div className="hunt-grid">
         <Viewfinder s={s} onBox={setBox} scored={scored} />
         <div className="hunt-results">
-          <div className="row-head"><span className="spec">{box ? 'Inside the frame' : q ? `Results · “${q}”` : 'Sorted by how close to you'}</span><span className="spec">{results.length} films</span></div>
+          <div className="row-head"><span className="spec">{box ? 'In frame' : q ? `“${q}”` : 'Closest to you'}</span><span className="spec">{results.length} films</span></div>
           <div className="hr-grid">
             <AnimatePresence initial={false}>
               {results.map((f) => (
@@ -65,7 +64,7 @@ export default function Hunt() {
               ))}
             </AnimatePresence>
           </div>
-          {!results.length && <p className="spec empty">Nothing in that frame. Widen it, or drop the vibe.</p>}
+          {!results.length && <p className="spec empty">Nothing in frame.</p>}
         </div>
       </div>
     </div>
@@ -158,7 +157,7 @@ function Viewfinder({ s, onBox, scored }) {
 
   return (
     <div className="vf">
-      <div className="vf-head"><span className="spec lit">The Viewfinder</span><span className="spec">Drag the frame · pull the corner to widen</span></div>
+      <div className="vf-head"><span className="spec">The Viewfinder</span></div>
       <div className="vf-stage" ref={wrap} onPointerMove={move} onPointerUp={up} onPointerLeave={() => setHov(null)}>
         <canvas ref={cv} />
         <span className="vf-ax l spec">Warm</span><span className="vf-ax r spec">Sharp</span><span className="vf-ax t spec">Loud</span><span className="vf-ax b spec">Quiet</span>

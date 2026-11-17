@@ -178,7 +178,7 @@
 .ins-bars { display: flex; gap: 5px; }
 .ins-bars .bar-atom { width: 5px; height: 14px; }
 .ins-grid { position: relative; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
-.ins-card { display: flex; flex-direction: column; gap: 12px; padding: 22px; background: var(--base-2); box-shadow: inset 0 0 0 1px var(--line); min-height: 220px; }
+.ins-card { display: flex; flex-direction: column; gap: 12px; padding: 22px; background: var(--base-2); box-shadow: inset 0 0 0 1px var(--line); min-height: 160px; }
 .ins-card.sharp { box-shadow: inset 0 0 0 1.5px var(--select); }
 .ins-big { font-variation-settings: 'wdth' 112; font-weight: 750; font-size: clamp(26px, 2.6vw, 36px); line-height: 1.02; letter-spacing: -0.03em; }
 .ins-card p { margin: auto 0 0; color: var(--fg-2); font-size: 14px; line-height: 1.45; }

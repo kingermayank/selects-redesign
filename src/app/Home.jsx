@@ -45,14 +45,14 @@ export default function Home({ arch }) {
       <header className="home-head">
         <span className="spec">{DAYS[now.getDay()]} {now.getDate()} {MONTHS[now.getMonth()]} · {torn.length ? `${torn.length} kept for tonight` : `lights down in ${until < 1 ? 'under an hour' : `${Math.floor(until)}h ${String(Math.round((until % 1) * 60)).padStart(2, '0')}m`}`}</span>
         <h1 className="verdict home-h"><Rise text={`${DAYS[now.getDay()]}’s\nticket.`} stagger={0.07} /></h1>
-        <p className="home-sub">{greet}{s.name ? `, ${s.name.split(' ')[0]}` : ''}. Two close to everything you kept, one reach. Tear a stub to keep it for tonight.</p>
+        <p className="home-sub">{greet}{s.name ? `, ${s.name.split(' ')[0]}` : ''}.</p>
       </header>
 
       <section className="home-tickets" onPointerLeave={() => {}}>
         {t.map((e, i) => (
           <motion.div key={e.f.id} className="ht-item" onPointerEnter={() => setFocus(i)} onFocus={() => setFocus(i)} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.1, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}>
             <Ticket f={e.f} why={reason(e)} slot={e.slot} index={i} torn={torn.includes(e.f.id)} onTear={onTear} onOpen={(f) => go(`film-${f.id}`)} time={`${((hour + 11) % 12) + 1}:40 ${hour >= 12 ? 'PM' : 'AM'}`} />
-            {!torn.includes(e.f.id) && <button className="ht-swap link-spec" onClick={() => swap(e.f)}>Not tonight · swap</button>}
+            {!torn.includes(e.f.id) && <button className="ht-swap link-spec" onClick={() => swap(e.f)}>Swap</button>}
           </motion.div>
         ))}
       </section>
@@ -61,9 +61,9 @@ export default function Home({ arch }) {
 
       <YearStrip s={s} />
 
-      <Row kicker="Because of the night" title={pick0 ? `Because you kept ${pick0.t}` : 'Close to you'} items={because} />
-      {th && hole.length > 2 && <Row kicker="Rabbit hole" title={`${th.who}, all night`} items={hole} />}
-      <Row kicker="The Wallet" title="The ten closest to you" items={wallet} />
+      <Row title={pick0 ? `Because you kept ${pick0.t}` : 'Close to you'} items={because} />
+      {th && hole.length > 2 && <Row title={`${th.who}, all night`} items={hole} />}
+      <Row title="The Wallet" items={wallet} />
     </div>
   )
 }
@@ -78,8 +78,7 @@ function Nudge({ s, t, torn, until, hour }) {
     <motion.aside className="nudge" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
       <span className="nudge-bar" />
       <div>
-        <span className="spec lit">The nudge</span>
-        <p>{torn.length ? `${f.t} is ${fmtRuntime(f.rt).toLowerCase()}. Start at ${fmt(hour, 0)} and the credits roll at ${fmt(endH, endM)}.` : `${f.t} runs ${fmtRuntime(f.rt).toLowerCase()}. Lights down at ${fmt(hour, 0)} gets you to the credits by ${fmt(endH, endM)}.`}</p>
+        <p>{`${f.t}: start ${fmt(hour, 0)}, credits ${fmt(endH, endM)}.`}</p>
       </div>
     </motion.aside>
   )
@@ -104,10 +103,8 @@ function YearStrip({ s }) {
     <section className="year">
       <div className="row-head">
         <div>
-          <span className="spec">The Strip · {now.getFullYear()}</span>
           <h3 className="row-title">{count} {count === 1 ? 'film' : 'films'} this year{hov != null && logged[hov] ? <span className="year-hov"> · {film(logged[hov])?.t}</span> : null}</h3>
         </div>
-        <span className="spec">Day {today + 1} / {days}</span>
       </div>
       <div className="year-row" onPointerLeave={() => setHov(null)}>
         {Array.from({ length: days }).map((_, d) => {

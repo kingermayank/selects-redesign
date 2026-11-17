@@ -216,20 +216,20 @@ export function insights(profile) {
   const hour = profile.hour ?? 21
   const hh = ((hour + 11) % 12) + 1
   const ampm = hour >= 12 ? 'PM' : 'AM'
-  if (pos[0]) out.push({ k: 'THE FLOOR', big: pos[0].t, line: `Everything starts from ${pos[0].t}. It is the film every ticket gets measured against.` })
+  if (pos[0]) out.push({ k: 'THE FLOOR', big: pos[0].t, line: 'Every ticket is measured against it.' })
   out.push({
     k: 'THE HOUR',
     big: `${hh}:00 ${ampm}`,
-    line: hour >= 22 || hour < 4 ? 'You watch late. Tickets will lean darker after ten, and shorter after midnight.' : hour >= 18 ? 'Prime time. You get the long ones on Fridays and the tight ones midweek.' : 'Daylight viewer. Rare, and noted. Matinees get the reach.',
+    line: hour >= 22 || hour < 4 ? 'You watch late. Tickets lean darker.' : hour >= 18 ? 'Prime time. Long ones on Fridays.' : 'Matinees get the reach.',
   })
   const th = thread([...pos.map((f) => f.id), ...read.map((e) => e.f.id)])
-  if (th && th.films.length > 1) out.push({ k: 'THE THREAD', big: th.who, line: `${th.who} keeps showing up, ${th.role === 'actor' ? 'in front of' : 'behind'} the camera. ${th.films.length} films on your map.` })
+  if (th && th.films.length > 1) out.push({ k: 'THE THREAD', big: th.who, line: `${th.films.length} films on your map.` })
   const warm = pos.filter((f) => f.warm > 0.02).length
-  if (pos.length >= 2) out.push({ k: 'THE TEMPERATURE', big: `${warm} warm · ${pos.length - warm} sharp`, line: warm >= pos.length - warm ? 'You keep the warm ones. The sharp ones are how you stay honest.' : 'You keep the sharp ones. Warmth has to earn its way in.' })
-  if (neg[0]) out.push({ k: 'STRUCK', big: neg[0].t, sharp: true, line: `Everyone loved it. It never landed for you. Anything built the same way starts a step behind.` })
+  if (pos.length >= 2) out.push({ k: 'THE TEMPERATURE', big: `${warm} warm · ${pos.length - warm} sharp`, line: warm >= pos.length - warm ? 'You keep the warm ones.' : 'Warmth has to earn it.' })
+  if (neg[0]) out.push({ k: 'STRUCK', big: neg[0].t, sharp: true, line: 'Anything built like it starts a step behind.' })
   if ((profile.axes || []).length) {
     const a = profile.axes
-    out.push({ k: 'WHAT YOU ARE THERE FOR', big: a.includes('both') || (a.includes('writing') && a.includes('room')) ? 'Both' : a.includes('writing') ? 'The writing' : 'The room', line: a.includes('room') && !a.includes('writing') ? 'Format matters to you. 70mm and IMAX runs get flagged the week they open.' : 'Structure first. Tickets favour films that hold up on a second watch.' })
+    out.push({ k: 'WHAT YOU ARE THERE FOR', big: a.includes('both') || (a.includes('writing') && a.includes('room')) ? 'Both' : a.includes('writing') ? 'The writing' : 'The room', line: a.includes('room') && !a.includes('writing') ? '70mm and IMAX runs get flagged.' : 'Films that hold up on a rewatch.' })
   }
   return out
 }
