@@ -59,15 +59,30 @@ function Nav({ to, start, returning }) {
   const [solid, setSolid] = useState(false)
   const [hidden, setHidden] = useState(false)
   useEffect(() => {
-    let last = scrollY
-    const on = () => {
-      setSolid(scrollY > 40)
-      setHidden(scrollY > 600 && scrollY > last + 2)
-      if (scrollY < last - 2) setHidden(false)
-      last = scrollY
+    // One update per frame; ignore iOS rubber-band overscroll; only flip after a
+    // deliberate 48px run in one direction, so momentum jitter never toggles it.
+    let last = Math.max(0, scrollY), run = 0, raf = 0, isSolid = false, isHidden = false
+    const set = (solidNext, hiddenNext) => {
+      if (solidNext !== isSolid) { isSolid = solidNext; setSolid(solidNext) }
+      if (hiddenNext !== isHidden) { isHidden = hiddenNext; setHidden(hiddenNext) }
     }
+    const update = () => {
+      raf = 0
+      const max = Math.max(0, document.documentElement.scrollHeight - innerHeight)
+      const y = Math.min(Math.max(scrollY, 0), max)
+      const d = y - last
+      last = y
+      if (d !== 0) run = Math.sign(d) === Math.sign(run) ? run + d : d
+      let hiddenNext = isHidden
+      if (y < 600) { hiddenNext = false; run = 0 }
+      else if (run > 48) hiddenNext = true
+      else if (run < -48) hiddenNext = false
+      set(y > 40, hiddenNext)
+    }
+    const on = () => { if (!raf) raf = requestAnimationFrame(update) }
     addEventListener('scroll', on, { passive: true })
-    return () => removeEventListener('scroll', on)
+    update()
+    return () => { removeEventListener('scroll', on); cancelAnimationFrame(raf) }
   }, [])
   const mag = useMagnetic(0.2)
   return (
