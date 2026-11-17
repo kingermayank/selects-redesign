@@ -106,8 +106,8 @@
 .axis { display: grid; grid-template-columns: 56px 1fr 24px; align-items: center; gap: 16px; text-align: left; padding: 22px 20px; background: var(--base-2); box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow .3s, background .3s, transform .5s var(--ease); }
 .axis:hover { background: var(--base-3); }
 .axis.on { box-shadow: inset 0 0 0 1.5px var(--select); background: var(--base-3); }
-.axis-txt { display: flex; flex-direction: column; gap: 6px; }
-.axis-txt b { font-size: clamp(18px, 1.6vw, 22px); font-weight: 600; letter-spacing: -0.02em; }
+.axis-txt { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.axis-txt b { font-size: clamp(18px, 1.6vw, 22px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
 .axis-check { width: 18px; height: 18px; box-shadow: inset 0 0 0 1px var(--line-2); position: relative; transition: background .3s; }
 .axis-check.on { background: var(--select); box-shadow: none; }
 .axis-check.on::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid var(--base); border-width: 0 2px 2px 0; transform: rotate(45deg); }
@@ -117,7 +117,7 @@
 .dial { position: relative; width: min(84vw, 420px); aspect-ratio: 1; margin: 0 auto; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
 .dial:active { cursor: grabbing; }
 .dial-svg { width: 100%; height: 100%; overflow: visible; }
-.dial-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; fill: var(--fg-3); }
+.dial-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; fill: var(--fg-3); }
 .dial-read { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; pointer-events: none; }
 .dial-time { font-size: clamp(48px, 7.4vw, 76px); line-height: 1; }
 .dial-line { text-align: center; margin: 22px 0 0; color: var(--fg-2); font-size: 17px; }
