@@ -93,11 +93,11 @@
   background:
     radial-gradient(circle at 50% 50%, var(--base) 2.4px, transparent 2.6px) 0 3px / 14px 10px repeat-x,
     radial-gradient(circle at 50% 50%, var(--base) 2.4px, transparent 2.6px) 0 calc(100% - 3px) / 14px 10px repeat-x,
-    linear-gradient(#5a1a05, #9a3a0e);
+    linear-gradient(#141416, #222226);
   max-width: 420px;
 }
 .tray-frame { position: relative; aspect-ratio: 2/3; background: rgba(0,0,0,.45); display: grid; place-items: center; overflow: hidden; }
-.tray-frame .spec { color: rgba(255,200,160,.45); font-size: 9px; }
+.tray-frame .spec { color: rgba(239,237,233,.32); font-size: 9px; }
 .tray-img { position: absolute; inset: 0; }
 .tray-img img { width: 100%; height: 100%; object-fit: cover; }
 

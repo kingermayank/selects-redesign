@@ -133,18 +133,18 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
         float hole = sdRound(hp, vec2(0.052, 0.034), 0.016);
         bool inBand = v < band || v > 1.0 - band;
         if (inBand && hole < 0.0) discard;
-        // ── base: amber, uneven, like it has been handled
+        // ── base: black celluloid, uneven, like it has been handled
         float grainN = noise(vec2(u * 140.0, v * 90.0) + uTime * 3.0);
-        vec3 base = mix(vec3(0.62, 0.16, 0.02), vec3(0.96, 0.36, 0.06), fbm(vec2(u * 2.0, v * 3.0)));
+        vec3 base = mix(vec3(0.035, 0.036, 0.04), vec3(0.12, 0.122, 0.13), fbm(vec2(u * 2.0, v * 3.0)));
         base *= 0.9 + grainN * 0.18;
         // sprocket edge burn
-        base += smoothstep(0.012, 0.0, abs(hole)) * vec3(0.6, 0.3, 0.1) * float(inBand);
+        base += smoothstep(0.012, 0.0, abs(hole)) * vec3(0.32) * float(inBand);
         // edge print in the lower band
         if (v < band * 0.86 && v > band * 0.06) {
           float ey = (v - band * 0.06) / (band * 0.8);
           float print = texture2D(uEdge, vec2(u * 0.075, 1.0 - ey)).r;
           float zone = smoothstep(0.30, 0.38, fract(fx * 4.0)) * smoothstep(0.70, 0.62, fract(fx * 4.0));
-          base = mix(base, vec3(1.0, 0.78, 0.45), print * 0.5 * (1.0 - zone));
+          base = mix(base, vec3(0.78, 0.78, 0.76), print * 0.55 * (1.0 - zone));
         }
         vec3 col = base;
         // ── the frame
@@ -155,19 +155,21 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
         vec2 cell = vec2(mod(idx, uCols), floor(idx / uCols));
         vec2 auv = vec2((cell.x + iuv.x) / uCols, 1.0 - (cell.y + 1.0 - iuv.y) / uRows);
         vec3 img = texture2D(uAtlas, auv).rgb;
-        // colour negative: inverted, carried on an orange mask
-        vec3 neg = (1.0 - img);
-        neg = neg * vec3(0.95, 0.42, 0.16) + vec3(0.16, 0.035, 0.0);
+        // black-and-white negative: luminance inverted, a little silver in the highlights
+        float lum = dot(img, vec3(0.299, 0.587, 0.114));
+        vec3 neg = vec3(pow(1.0 - lum, 1.6)) * vec3(0.46, 0.47, 0.5) + 0.025;
         // develop: a chemical front, not a crossfade
         float n = fbm(iuv * vec2(5.0, 3.0) + fid * 7.13 + uTime * 0.05);
         float dev = smoothstep(0.0, 0.18, vDev * 1.25 - n * 0.55);
-        vec3 pos = pow(img, vec3(0.92)) * 1.06;
+        // developed: a monochrome print with the film's own colour coming through
+        vec3 pos = mix(vec3(lum), img, 0.55);
+        pos = pow(pos, vec3(0.92)) * 1.06;
         float front = smoothstep(0.0, 0.08, vDev * 1.25 - n * 0.55) - dev;
-        vec3 pic = mix(neg, pos, dev) + front * vec3(1.0, 0.55, 0.2) * 0.9;
+        vec3 pic = mix(neg, pos, dev) + front * vec3(1.0, 0.98, 0.94) * 0.8;
         // frame line between frames
         float edgeFade = smoothstep(0.0, 0.012, min(min(fx - x0, x1 - fx), min(v - y0, y1 - v)));
         col = mix(col, pic * (0.75 + 0.25 * edgeFade), inImg);
-        col = mix(col, vec3(0.08, 0.02, 0.0), (1.0 - inImg) * step(band, v) * step(v, 1.0 - band) * 0.7);
+        col = mix(col, vec3(0.012), (1.0 - inImg) * step(band, v) * step(v, 1.0 - band) * 0.7);
         // ── light: backlit like a light table, glossy on the emulsion side
         vec3 N = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0);
         vec3 V = normalize(vView);
@@ -176,9 +178,9 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
         vec3 H = normalize(uLight + V);
         float spec = pow(max(dot(N, H), 0.0), 60.0);
         float sweep = smoothstep(0.08, 0.0, abs(fract(vUv.x * 0.06 - uTime * 0.05) - 0.5) - 0.42);
-        col *= 0.55 + 0.6 * facing;
-        col += rim * vec3(1.0, 0.38, 0.08) * 0.5;
-        col += spec * vec3(1.0, 0.85, 0.7) * 0.9 + sweep * vec3(1.0, 0.5, 0.2) * 0.1;
+        col *= 0.6 + 0.55 * facing;
+        col += rim * vec3(0.78, 0.82, 0.92) * 0.42;
+        col += spec * vec3(1.0) * 0.85 + sweep * vec3(0.9, 0.92, 1.0) * 0.07;
         col *= uBright;
         float fog = smoothstep(uFog.x, uFog.y, vDepth);
         col = mix(col, uFogColor, fog);
@@ -245,8 +247,10 @@ export function dust(count = 500, spread = [16, 10, 14]) {
     p[i * 3 + 2] = (Math.random() - 0.7) * spread[2]
     const big = Math.random() < 0.07
     s[i] = big ? 60 + Math.random() * 140 : 2 + Math.random() * 7
-    const warm = Math.random()
-    c[i * 3] = 1; c[i * 3 + 1] = 0.55 + warm * 0.4; c[i * 3 + 2] = 0.3 + warm * 0.55
+    // neutral dust; a few motes carry a hint of colour
+    const h = Math.random(), k = 0.82 + Math.random() * 0.18
+    const tint = h < 0.05 ? [1, 0.4, 0.16] : h < 0.11 ? [0.5, 0.68, 1] : [0.94, 0.95, 1]
+    c[i * 3] = tint[0] * k; c[i * 3 + 1] = tint[1] * k; c[i * 3 + 2] = tint[2] * k
     r[i] = Math.random()
   }
   g.setAttribute('position', new THREE.BufferAttribute(p, 3))
@@ -273,7 +277,7 @@ export function dust(count = 500, spread = [16, 10, 14]) {
         gl_PointSize = aSize * uPx * (big > 0.5 ? 1.0 : 6.0 / -mv.z);
         vC = aColor;
         float tw = 0.55 + 0.45 * sin(uTime * (1.0 + aRand * 3.0) + aRand * 40.0);
-        vA = (big > 0.5 ? 0.03 + aRand * 0.035 : 0.5 * tw) * smoothstep(30.0, 4.0, -mv.z);
+        vA = (big > 0.5 ? 0.016 + aRand * 0.02 : 0.45 * tw) * smoothstep(30.0, 4.0, -mv.z);
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: /* glsl */ `

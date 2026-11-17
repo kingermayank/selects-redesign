@@ -146,7 +146,7 @@ export async function createDevelop(canvas, { posters, stills, duration = 7.2, o
           float core = exp(-pow(p.y * 9.0, 2.0)) * smoothstep(2.4, 0.0, abs(p.x));
           float halo = exp(-dot(p, p) * 0.9);
           float rays = pow(max(0.0, 1.0 - abs(p.y) * 1.2), 3.0) * (0.6 + 0.4 * sin(p.x * 30.0 + uTime * 4.0));
-          vec3 c = vec3(1.0, 0.9, 0.78) * core * 1.6 + vec3(1.0, 0.55, 0.25) * halo * 0.35 + vec3(0.9, 0.7, 1.0) * rays * 0.05;
+          vec3 c = vec3(1.0, 0.99, 0.97) * core * 1.6 + vec3(0.8, 0.85, 1.0) * halo * 0.3 + vec3(0.9, 0.9, 1.0) * rays * 0.05;
           gl_FragColor = vec4(c * uI, 1.0);
         }`,
     }),

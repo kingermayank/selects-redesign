@@ -63,7 +63,7 @@ export async function createReel(canvas, { images, portrait = false, onReady } =
           float fall = smoothstep(1.3, 0.0, length(p));
           float flick = 0.92 + 0.08 * sin(uTime * 37.0) * sin(uTime * 11.0);
           float rays = 0.75 + 0.25 * sin(ang * 90.0 + uTime * 0.6);
-          vec3 c = vec3(1.0, 0.5, 0.22) * cone * fall * rays * 0.055 * flick;
+          vec3 c = vec3(0.86, 0.89, 1.0) * cone * fall * rays * 0.028 * flick;
           gl_FragColor = vec4(c, 1.0);
         }`,
     }),
@@ -77,7 +77,7 @@ export async function createReel(canvas, { images, portrait = false, onReady } =
   // ── post
   const composer = new EffectComposer(renderer)
   composer.addPass(new RenderPass(scene, camera))
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), mobile ? 0.5 : 0.62, 0.55, 0.72)
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), mobile ? 0.45 : 0.55, 0.5, 0.8)
   composer.addPass(bloom)
   const finish = new ShaderPass(FinishShader)
   composer.addPass(finish)
