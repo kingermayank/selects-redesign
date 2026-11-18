@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Arrow } from '../components/Icons.jsx'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Img, useRoute } from '../components/ui.jsx'
-import Assembly from '../components/Assembly.jsx'
+import Wheel from '../components/Wheel.jsx'
 import { Row, Bars } from './parts.jsx'
 import { film, backdrop, logo, colour, fmtRuntime, films } from '../lib/films.js'
 import { scoreAll, reason, reasonShort } from '../lib/taste.js'
@@ -86,7 +86,7 @@ export default function Film({ id }) {
 
         <aside className="film-dna">
           <div className="row-head"><h3 className="row-title">The DNA</h3></div>
-          <div className="dna-stage"><Assembly ids={dna} you={c} height={'100%'} youLabel={f.t.toUpperCase()} onOpen={(x) => go(`film-${x.id}`)} intro={false} /></div>
+          <div className="dna-stage"><Wheel ids={dna} kept={[...s.positive, ...(s.kept || [])]} you={c} label={f.t} height="100%" onOpen={(x) => go(`film-${x.id}`)} /></div>
           <div className="film-kw">{f.k.slice(0, 10).map((k) => <span key={k} className="chip">{k}</span>)}</div>
         </aside>
       </div>

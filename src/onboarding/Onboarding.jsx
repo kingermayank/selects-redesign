@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { Arrow, LbDots } from '../components/Icons.jsx'
 import { motion, AnimatePresence, LayoutGroup, useMotionValue, animate } from 'framer-motion'
 import { Mark, Clap, BarProgress, Poster, Counter, Img, useRoute, SoundToggle } from '../components/ui.jsx'
-import Assembly from '../components/Assembly.jsx'
+import Wheel from '../components/Wheel.jsx'
 import { films, film, wall, search, poster, backdrop, colour, ids as byTitles } from '../lib/films.js'
 import { scoreAll, archetype, yourColour, insights } from '../lib/taste.js'
 import { useStore, setState, getState, tick } from '../lib/store.js'
@@ -537,7 +537,7 @@ function Reveal({ s, next }) {
         <AnimatePresence mode="wait" initial={false}>
           {!open ? (
             <motion.div key="graph" className="reveal-graph" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }} transition={{ duration: 0.4 }}>
-              <Assembly ids={[...s.positive, ...reads]} you={c} height={'100%'} youLabel={(s.name || 'YOU').toUpperCase()} />
+              <Wheel ids={[...s.positive, ...reads]} kept={s.positive} you={c} label={s.name ? s.name.split(' ')[0] : 'You'} height="100%" className="bare" />
             </motion.div>
           ) : (
             <motion.div key="read" className="reveal-read" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>

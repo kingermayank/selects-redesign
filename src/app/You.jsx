@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Arrow } from '../components/Icons.jsx'
 import { motion } from 'framer-motion'
-import Assembly from '../components/Assembly.jsx'
+import Wheel from '../components/Wheel.jsx'
 import { Counter, Mark, useRoute } from '../components/ui.jsx'
 import { film, poster } from '../lib/films.js'
 import { scoreAll, insights, thread } from '../lib/taste.js'
@@ -60,7 +60,7 @@ export default function You({ arch }) {
       <section className="you-assembly">
         <div className="row-head"><h3 className="row-title">The Assembly</h3>{th && <span className="spec">Thread · {th.who}</span>}</div>
         <div className="ya-stage">
-          <Assembly ids={[...s.positive, ...reads]} you={c} height={'100%'} youLabel={(s.name || 'YOU').toUpperCase()} onOpen={(f) => go(`film-${f.id}`)} />
+          <Wheel ids={[...s.positive, ...(s.kept || []), ...reads]} kept={[...s.positive, ...(s.kept || [])]} you={c} label={s.name ? s.name.split(' ')[0] : 'You'} height="100%" onOpen={(f) => go(`film-${f.id}`)} />
         </div>
       </section>
 

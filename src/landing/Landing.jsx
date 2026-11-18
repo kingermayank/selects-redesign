@@ -5,7 +5,7 @@ import Lenis from 'lenis'
 import { Mark, Lockup, Rise, Counter, Poster, Img, useRoute, useMagnetic, Clap, SoundToggle } from '../components/ui.jsx'
 import Ticket from '../components/Ticket.jsx'
 import { TabIcon, LbDots } from '../components/Icons.jsx'
-import Assembly from '../components/Assembly.jsx'
+import Wheel from '../components/Wheel.jsx'
 import { film, films, backdrop, poster, colour, logo, fmtRuntime, ids as byTitles } from '../lib/films.js'
 import { yourColour, ARCHETYPES } from '../lib/taste.js'
 import { setState, getState } from '../lib/store.js'
@@ -336,7 +336,7 @@ function AssemblySection() {
         <Rise as="h2" className="verdict sec-h" text={'Your taste,\nin the end credits.'} />
       </div>
       <div className="a-stage">
-        <Assembly ids={all} you="#3A6E85" height={'100%'} />
+        <Wheel ids={all} kept={ids.slice(0, 8)} you="#3A6E85" label="You" height="100%" className="bare" />
       </div>
     </section>
   )

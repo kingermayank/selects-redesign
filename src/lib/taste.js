@@ -234,17 +234,30 @@ export function insights(profile) {
   return out
 }
 
-/* ── the assembly: a graph of the people between your films ── */
-export function assembly(ids, max = 36) {
-  const fs = ids.map(film).filter(Boolean).slice(0, max)
-  const nodes = fs.map((f) => ({ id: f.id, f, c: colour(f) }))
-  const edges = []
-  for (let i = 0; i < fs.length; i++)
-    for (let j = i + 1; j < fs.length; j++) {
-      const a = fs[i], b = fs[j]
-      const who = [...overlap(a.dir, b.dir), ...overlap(a.dp, b.dp), ...overlap(a.mus, b.mus), ...overlap(a.cast.slice(0, 4), b.cast.slice(0, 4))]
-      const w = who.length + (a.recs.includes(b.id) || b.recs.includes(a.id) ? 0.6 : 0) + (overlap(a.g, b.g).length >= 2 ? 0.3 : 0) + Math.min(0.6, overlap(a.k, b.k).length * 0.2)
-      if (w >= 0.6) edges.push({ a: i, b: j, w, who })
-    }
-  return { nodes, edges }
+
+/* ── the wheel: your films, sorted by the craft that ties them ─────────
+   Five sectors around you. Each sector grows a branch for every person (or
+   theme) who keeps turning up, and each branch carries their films. */
+export const SECTORS = [
+  { key: 'dir', name: 'Direction', role: 'Director', colour: '#FF3B14' },
+  { key: 'dp', name: 'Camera', role: 'Cinematographer', colour: '#7FA6CC' },
+  { key: 'mus', name: 'Score', role: 'Composer', colour: '#D7A63E' },
+  { key: 'cast', name: 'Cast', role: 'Actor', colour: '#EFEDE9' },
+  { key: 'k', name: 'Themes', role: 'Theme', colour: '#6FA38F' },
+]
+const DULL = /based on|sequel|credits|woman director|remake|duringcredits|aftercredits|^\d|biography|novel|comic|short film/
+export function wheel(ids, { perSector = 4, perPerson = 4 } = {}) {
+  const fs = [...new Set(ids)].map(film).filter(Boolean)
+  return SECTORS.map((sec) => {
+    const m = new Map()
+    fs.forEach((f) => {
+      const list = sec.key === 'cast' ? f.cast.slice(0, 4) : sec.key === 'k' ? f.k.filter((k) => !DULL.test(k)).slice(0, 8) : f[sec.key] || []
+      list.forEach((p) => { if (!m.has(p)) m.set(p, []); m.get(p).push(f.id) })
+    })
+    const all = [...m.entries()].map(([who, films]) => ({ who, films: [...new Set(films)] }))
+    let people = all.filter((p) => p.films.length >= 2).sort((a, b) => b.films.length - a.films.length)
+    if (people.length < 2) people = [...people, ...all.filter((p) => p.films.length < 2 && !people.includes(p))].slice(0, 2)
+    people = people.slice(0, perSector).map((p) => ({ ...p, films: p.films.slice(0, perPerson) }))
+    return { ...sec, people, weight: people.reduce((n, p) => n + p.films.length, 0) }
+  }).filter((s) => s.people.length)
 }
