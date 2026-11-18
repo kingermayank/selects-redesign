@@ -161,7 +161,7 @@ function Positive({ s, next }) {
     tick(on ? 4 : 10); play(on ? 'unpick' : 'pick')
     if (!on && el) {
       const slot = document.querySelectorAll('.tray-frame')[Math.min(picks.length, 4)]
-      slot && emit({ from: el, to: slot, n: 70, colour: '#ff3b14', spread: 0.15, dur: [0.45, 0.8], size: 1.4, arc: 0.2 })
+      slot && emit({ from: el, to: slot, n: 14, colour: '#efede9', spread: 0.12, dur: [0.4, 0.62], size: 0.9, arc: 0.12, alpha: 0.38, trail: false })
     }
     setState((st) => ({ positive: st.positive.includes(id) ? st.positive.filter((x) => x !== id) : [...st.positive, id].slice(-5) }))
   }
@@ -169,13 +169,13 @@ function Positive({ s, next }) {
     <div className="ob-split wall-split">
       <Q layout="wide" title="If you could rent a theatre and watch one film in it forever, what is it?">
         <Tray ids={picks} onRemove={toggle} />
-        <p className="spec tray-count">{picks.length ? `${picks.length} of 5 in the reel` : 'Pick one to start the reel'}</p>
+        <p className={`spec tray-count ${picks.length >= 5 ? 'ready' : ''}`}>{picks.length >= 5 ? <><i className="live-dot" />Reel loaded. Ready to roll</> : picks.length ? `${picks.length} of 5 in the reel` : 'Pick one to start the reel'}</p>
       </Q>
       <div className="ob-right">
         <Search value={q} onChange={setQ} placeholder="Search any film, director or actor" />
         <Wall list={list} picked={picks} onPick={toggle} kind="positive" label={q ? `Results for “${q}”` : picks.length ? 'Re-sorted around your pick' : 'Trending this week and always'} />
       </div>
-      <CTA label="Continue" onClick={next} disabled={!picks.length} />
+      <CTA label="Continue" onClick={next} disabled={!picks.length} lit={picks.length >= 5} />
     </div>
   )
 }
@@ -260,8 +260,12 @@ function Wall({ list, picked, onPick, kind, label }) {
 /* the tray: a short strip of film that fills as you pick */
 function Tray({ ids, onRemove }) {
   const slots = [0, 1, 2, 3, 4]
+  const full = ids.length >= 5
+  // the fifth frame loads the reel: it starts to run, once, with a sound like a projector catching
+  const was = useRef(full)
+  useEffect(() => { if (full && !was.current) { play('roll'); tick([6, 40, 6, 40, 6]) } was.current = full }, [full])
   return (
-    <div className="tray" aria-label="Your picks">
+    <div className={`tray ${full ? 'rolling' : ''}`} aria-label="Your picks">
       <div className="tray-strip">
         {slots.map((i) => {
           const id = ids[i]
@@ -389,10 +393,10 @@ function Import({ s, next }) {
     if (!name || phase === 'linking') return
     setU(name); setPhase('linking'); setRow(0); play('link'); tick(12)
     SHELVES.forEach((_, i) => {
-      later(() => from.current && emit({ from: from.current, to: to.current, n: 46, colour: LB[i], spread: 0.3, dur: [0.55, 0.95], size: 1.5, arc: 0.18 }), i * 560)
-      later(() => { setRow(i + 1); play('detent'); tick(6) }, i * 560 + 760)
+      later(() => from.current && to.current && emit({ from: from.current, to: to.current, n: 22, colour: LB[i], spread: 0.3, dur: [0.55, 0.9], size: 1.2, arc: 0.14, alpha: 0.7, trail: false }), 380 + i * 560)
+      later(() => { setRow(i + 1); play('detent'); tick(6) }, 380 + i * 560 + 760)
     })
-    later(() => { setPhase('done'); setState({ letterboxd: name }); play('copy') }, SHELVES.length * 560 + 900)
+    later(() => { setPhase('done'); setState({ letterboxd: name }); play('copy') }, 380 + SHELVES.length * 560 + 900)
   }
   const edit = (v) => { setU(v); if (phase === 'done') { setPhase('idle'); setRow(0); setState({ letterboxd: '' }) } }
   return (
@@ -407,25 +411,31 @@ function Import({ s, next }) {
             </label>
             <button className={`btn ${phase === 'done' ? 'ghost' : ''}`} type="submit" disabled={!u.trim() || phase !== 'idle'} data-sfx="none">{phase === 'done' ? 'Linked' : 'Link'}</button>
           </form>
-          <div className="bridge" aria-hidden="true">
-            <span className="bridge-end" ref={from}><LbDots size={22} /></span>
-            <span className="bridge-line"><i /></span>
-            <span className="bridge-end" ref={to}><Mark size={26} lit={phase === 'idle' ? -1 : 2} /></span>
-          </div>
-          <ul className="shelves" aria-live="polite">
-            {SHELVES.map(([k, d], i) => {
-              const st = phase === 'idle' ? 'wait' : row > i ? 'in' : row === i ? 'now' : 'wait'
-              return (
-                <li key={k} className={`shelf ${st}`} style={{ '--c': LB[i] }}>
-                  <span className="shelf-k">{k}</span>
-                  <span className="shelf-d">{d}</span>
-                  <span className="shelf-bars">{[0, 1, 2, 3, 4].map((j) => <i key={j} style={{ transitionDelay: `${j * 70}ms` }} />)}</span>
-                  <span className="shelf-ok">{st === 'in' ? <svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5.2L4.2 8.4L11 1.6" stroke="currentColor" strokeWidth="1.6" fill="none" /></svg> : null}</span>
-                </li>
-              )
-            })}
-          </ul>
-          <p className="spec imp-note">{phase === 'done' ? `@${u} · ready to read` : phase === 'linking' ? 'Carrying it across' : 'Public profiles only. Nothing is posted.'}</p>
+          <AnimatePresence initial={false}>
+            {phase !== 'idle' && (
+              <motion.div key="transfer" className="imp-transfer" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}>
+              <div className="bridge" aria-hidden="true">
+                <span className="bridge-end" ref={from}><LbDots size={22} /></span>
+                <span className="bridge-line"><i /></span>
+                <span className="bridge-end" ref={to}><Mark size={26} lit={phase === 'idle' ? -1 : 2} /></span>
+              </div>
+              <ul className="shelves" aria-live="polite">
+                {SHELVES.map(([k, d], i) => {
+                  const st = phase === 'idle' ? 'wait' : row > i ? 'in' : row === i ? 'now' : 'wait'
+                  return (
+                    <li key={k} className={`shelf ${st}`} style={{ '--c': LB[i] }}>
+                      <span className="shelf-k">{k}</span>
+                      <span className="shelf-d">{d}</span>
+                      <span className="shelf-bars">{[0, 1, 2, 3, 4].map((j) => <i key={j} style={{ transitionDelay: `${j * 70}ms` }} />)}</span>
+                      <span className="shelf-ok">{st === 'in' ? <svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5.2L4.2 8.4L11 1.6" stroke="currentColor" strokeWidth="1.6" fill="none" /></svg> : null}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+              <p className="spec imp-note">{phase === 'done' ? `@${u} · ready to read` : phase === 'linking' ? 'Carrying it across' : 'Public profiles only. Nothing is posted.'}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
       <CTA label="Read me" onClick={next} lit />

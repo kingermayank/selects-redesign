@@ -22,13 +22,13 @@ const spectrum = (t) => {
 }
 
 /* emit({ from, to, n, colour, spread, dur, onArrive, onDone, size, arc }) */
-export function emit({ from, to, n = 120, colour = '#efede9', spread = 0.5, dur = [0.8, 1.5], onArrive, onDone, size = 1.6, arc = 0.35, edge = false } = {}) {
+export function emit({ from, to, n = 120, colour = '#efede9', spread = 0.5, dur = [0.8, 1.5], onArrive, onDone, size = 1.6, arc = 0.35, edge = false, alpha = 1, trail = true } = {}) {
   if (typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches) {
     onArrive && onArrive(1); onDone && onDone(); return
   }
   const a = rectOf(from), b = rectOf(to)
   const end = hex(colour)
-  const group = { left: n, arrived: 0, n, onArrive, onDone }
+  const group = { left: n, arrived: 0, n, onArrive, onDone, alpha, trail }
   for (let i = 0; i < n; i++) {
     const sx = a.x + Math.random() * a.w, sy = a.y + Math.random() * a.h
     // land inside the target, or on its edge for frames and cards
@@ -72,7 +72,7 @@ export function MotesLayer() {
           // arrival: a small flash, then gone
           const k = Math.min(1, (p.t - 1) * 6)
           if (!p.landed) { p.landed = true; p.group.arrived++; p.group.onArrive && p.group.onArrive(p.group.arrived / p.group.n) }
-          g.fillStyle = `rgba(${p.end[0]},${p.end[1]},${p.end[2]},${(1 - k) * 0.9})`
+          g.fillStyle = `rgba(${p.end[0]},${p.end[1]},${p.end[2]},${(1 - k) * 0.9 * p.group.alpha})`
           g.beginPath(); g.arc(p.ex, p.ey, p.r * (1 + k * 2.2), 0, Math.PI * 2); g.fill()
           if (k >= 1) {
             live.splice(i, 1)
@@ -87,10 +87,10 @@ export function MotesLayer() {
         const sp = spectrum(p.hue + t * 0.6 + now * 0.0002)
         const m = Math.max(0, (t - 0.55) / 0.45)
         const col = [sp[0] + (p.end[0] - sp[0]) * m, sp[1] + (p.end[1] - sp[1]) * m, sp[2] + (p.end[2] - sp[2]) * m]
-        const a = Math.min(1, t * 5) * 0.95
+        const a = Math.min(1, t * 5) * 0.95 * p.group.alpha
         g.strokeStyle = `rgba(${col[0] | 0},${col[1] | 0},${col[2] | 0},${a * 0.45})`
         g.lineWidth = p.r * 0.9
-        g.beginPath(); g.moveTo(p.px, p.py); g.lineTo(x, y); g.stroke()
+        if (p.group.trail) { g.beginPath(); g.moveTo(p.px, p.py); g.lineTo(x, y); g.stroke() }
         g.fillStyle = `rgba(${col[0] | 0},${col[1] | 0},${col[2] | 0},${a})`
         g.beginPath(); g.arc(x, y, p.r, 0, Math.PI * 2); g.fill()
         p.px = x; p.py = y

@@ -122,6 +122,12 @@ const LIB = {
     tone(t + 0.07, { f: 1320, type: 'sine', d: 0.09, v: 0.08 })
     grain(t + 0.07, { f: 4800, q: 4, d: 0.01, v: 0.2 })
   },
+  // roll: the reel catches; sprocket teeth speed up into a run
+  roll(t) {
+    let at = t
+    for (let i = 0; i < 14; i++) { grain(at, { f: 2400 + i * 90, q: 6, d: 0.01, v: 0.1 + i * 0.008 }); at += Math.max(0.028, 0.11 - i * 0.008) }
+    tone(at, { f: 660, d: 0.08, v: 0.06 }); tone(at + 0.07, { f: 990, d: 0.14, v: 0.06 })
+  },
   // reveal / done: the house lights. A slow open fifth in the colour of tungsten.
   develop(t) {
     ;[220, 330, 440, 554.4].forEach((f, i) => tone(t + i * 0.06, { f, type: 'sine', a: 0.25, d: 1.8, v: 0.05, pan: (i - 1.5) * 0.3 }))
