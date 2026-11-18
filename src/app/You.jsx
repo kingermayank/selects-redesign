@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Arrow } from '../components/Icons.jsx'
 import { motion } from 'framer-motion'
-import Wheel from '../components/Wheel.jsx'
+import Wheel, { stageOf } from '../components/Wheel.jsx'
 import { Counter, Mark, useRoute } from '../components/ui.jsx'
 import { film, poster } from '../lib/films.js'
 import { scoreAll, insights, thread } from '../lib/taste.js'
@@ -34,6 +34,7 @@ export default function You({ arch }) {
     setTimeout(() => setCopied(0), 3200)
   }
   const hour = s.hour ?? 22
+  const [known, setKnown] = useState(null)
 
   return (
     <div className="you" style={{ '--you': c }}>
@@ -58,9 +59,9 @@ export default function You({ arch }) {
       </header>
 
       <section className="you-assembly">
-        <div className="row-head"><h3 className="row-title">The Assembly</h3>{th && <span className="spec">Thread · {th.who}</span>}</div>
+        <div className="row-head"><div><h3 className="row-title">The Assembly</h3><p className="ya-sub">How well Selects knows you, craft by craft.</p></div>{known != null && <span className="spec ya-read"><b className="numeral">{Math.round(known * 100)}%</b> exposed · {stageOf(known)[1]}</span>}</div>
         <div className="ya-stage">
-          <Wheel ids={[...s.positive, ...(s.kept || []), ...reads]} kept={[...s.positive, ...(s.kept || [])]} you={c} label={s.name ? s.name.split(' ')[0] : 'You'} height="100%" onOpen={(f) => go(`film-${f.id}`)} />
+          <Wheel ids={[...s.positive, ...(s.kept || []), ...reads]} kept={[...s.positive, ...(s.kept || [])]} you={c} label={s.name ? s.name.split(' ')[0] : 'You'} height="100%" onOpen={(f) => go(`film-${f.id}`)} signals={{ kept: s.positive.length + (s.kept || []).length, struck: s.negative.length, logged: (s.logged || []).length }} onKnown={setKnown} />
         </div>
       </section>
 

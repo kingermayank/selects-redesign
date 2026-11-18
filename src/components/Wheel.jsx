@@ -26,6 +26,30 @@ const wedge = (a0, a1, r) => { const [x0, y0] = pt(a0, r), [x1, y1] = pt(a1, r);
 const initials = (s) => s.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
 
+/* How well Selects knows you, read as exposure. A craft is exposed by evidence:
+   films you kept in it, and people who recur across them. More light, sharper print. */
+export const STAGES = [
+  [0.2, 'Unexposed', 'Barely a frame to go on. Keep, strike or rate a few films.'],
+  [0.45, 'Latent image', 'The shape is on the film. Nothing shows yet.'],
+  [0.7, 'Developing', 'Your taste is coming up in the tray.'],
+  [0.9, 'Fixed', 'Sharp enough to programme your nights.'],
+  [1.01, 'Printed', 'Selects knows this side of you cold.'],
+]
+export const stageOf = (k) => STAGES.find(([t]) => k < t) || STAGES[STAGES.length - 1]
+function expose(sectors, kept, signals) {
+  sectors.forEach((s) => {
+    const ev = s.branches.reduce((n, b) => n + b.films.filter((f) => kept.has(f.id)).length + (b.films.length >= 2 ? 0.6 : 0), 0)
+    s.known = clamp(1 - Math.exp(-ev / 3.4), 0.05, 0.97)
+    // the next frame worth shooting: a film on a recurring branch you have not kept yet
+    const b = [...s.branches].sort((x, y) => y.films.length - x.films.length).find((x) => x.films.some((f) => !kept.has(f.id)))
+    s.next = b ? { b, id: b.films.find((f) => !kept.has(f.id)).id } : null
+  })
+  const w = sectors.reduce((n, x) => n + Math.max(x.weight, 3), 0) || 1
+  const avg = sectors.reduce((n, x) => n + x.known * Math.max(x.weight, 3), 0) / w
+  const vol = 1 - Math.exp(-((signals.kept || 0) + (signals.logged || 0) * 1.5 + (signals.struck || 0) * 0.7) / 14)
+  return clamp(avg * 0.62 + vol * 0.38, 0.03, 0.99)
+}
+
 function build(sectors, you) {
   const total = sectors.reduce((n, s) => n + Math.max(s.weight, 3), 0)
   const first = (360 * Math.max(sectors[0]?.weight || 3, 3)) / total
@@ -54,12 +78,17 @@ function build(sectors, you) {
   })
 }
 
-export default function Wheel({ ids, kept = [], you = '#3A6E85', label = 'YOU', onOpen, height = 640, className = '' }) {
+export default function Wheel({ ids, kept = [], you = '#3A6E85', label = 'YOU', onOpen, height = 640, className = '', signals, onKnown }) {
   const uid = useId().replace(/:/g, '')
   const svg = useRef(null)
   const wrap = useRef(null)
   const sectors = useMemo(() => build(wheel(ids), you), [ids.join(','), you])
   const keptSet = useMemo(() => new Set(kept), [kept.join(',')])
+  const known = useMemo(() => expose(sectors, keptSet, signals || { kept: kept.length }), [sectors, keptSet, signals && JSON.stringify(signals)])
+  // the meter needs a moment to read: arcs and ticks develop up from zero
+  const [dev, setDev] = useState(0)
+  useEffect(() => { const t = setTimeout(() => setDev(1), 250); return () => clearTimeout(t) }, [])
+  useEffect(() => { onKnown && onKnown(known) }, [known])
   const [hov, setHov] = useState(-1) // sector under the pointer (overview)
   const [focus, setFocus] = useState(-1) // sector turned to the top
   const [sel, setSel] = useState(null) // selected node key in focus
@@ -72,14 +101,14 @@ export default function Wheel({ ids, kept = [], you = '#3A6E85', label = 'YOU', 
   const groupT = F ? `translate(0px, 300px) scale(1.45) rotate(${rot.current}deg)` : `translate(0px, 0px) scale(1) rotate(${rot.current}deg)`
   const counter = `rotate(${-rot.current}deg)`
 
-  const nodes = useMemo(() => (F ? F.branches.flatMap((b) => [{ kind: 'person', b, key: b.key }, ...b.films.map((f) => ({ kind: 'film', b, f, key: f.key }))]) : []), [F])
+  const nodes = useMemo(() => (F ? [{ kind: 'craft', key: `${F.key}:craft` }, ...F.branches.flatMap((b) => [{ kind: 'person', b, key: b.key }, ...b.films.map((f) => ({ kind: 'film', b, f, key: f.key }))])] : []), [F])
   const selected = nodes.find((n) => n.key === sel) || nodes[0] || null
 
   const open = (i) => {
     if (i < 0 || i >= sectors.length) return
     setFocus(i); setHov(-1); setHint(null); play('whoosh')
     const s = sectors[i]
-    setSel(s.branches[0] ? s.branches[0].key : null)
+    setSel(`${s.key}:craft`)
   }
   const back = () => { setFocus(-1); setSel(null); play('secondary') }
   const step = (d) => open((focus + d + sectors.length) % sectors.length)
@@ -120,8 +149,10 @@ export default function Wheel({ ids, kept = [], you = '#3A6E85', label = 'YOU', 
   }
 
   const lit = F ? focus : hov
-  const centre = F ? F.name : hov >= 0 ? sectors[hov].name : label
-  const centreSub = F || hov >= 0 ? (() => { const s = sectors[lit]; const n = new Set(s.branches.flatMap((b) => b.films.map((f) => f.id))).size; return `${s.branches.length} ${s.key === 'k' ? 'threads' : 'people'} · ${n} films` })() : `${new Set(ids).size} films`
+  const L = lit >= 0 ? sectors[lit] : null
+  const reading = L ? L.known : known
+  const centre = L ? L.name : label
+  const centreSub = `${stageOf(reading)[1]}`
 
   return (
     <div ref={wrap} className={`wheel ${F ? 'is-focus' : ''} ${className}`} style={{ height }} tabIndex={0} onKeyDown={onKey} aria-label="The Assembly. Use the arrow keys to move between sectors.">
@@ -159,7 +190,10 @@ export default function Wheel({ ids, kept = [], you = '#3A6E85', label = 'YOU', 
           ))}
           {/* the ring, cut into crafts */}
           {sectors.map((s, i) => (
-            <path key={s.key} d={arc(s.a0, s.a1, R)} stroke={s.colour} className={`wh-arc ${lit >= 0 && lit !== i ? 'dim' : ''} ${lit === i ? 'on' : ''}`} />
+            <g key={s.key} className={`wh-arc-g ${lit >= 0 && lit !== i ? 'dim' : ''} ${lit === i ? 'on' : ''}`}>
+              <path d={arc(s.a0, s.a1, R)} stroke={s.colour} className="wh-arc track" />
+              <path d={arc(s.a0, s.a1, R)} stroke={s.colour} className="wh-arc" pathLength="1" style={{ strokeDasharray: `${(s.known * dev).toFixed(3)} 1`, transitionDelay: `${0.15 + i * 0.12}s` }} />
+            </g>
           ))}
           {/* branches */}
           {sectors.map((s, i) => {
@@ -200,18 +234,24 @@ export default function Wheel({ ids, kept = [], you = '#3A6E85', label = 'YOU', 
           })}
           {/* the hub */}
           <g style={{ transform: counter, transformOrigin: `${C}px ${C}px`, transition: T }}>
-            <text x={C} y={C - 2} className="wh-hub" textAnchor="middle">{centre.length > 18 ? centre.slice(0, 17) + '…' : centre}</text>
-            <text x={C} y={C + 22} className="wh-hub-sub" textAnchor="middle">{centreSub.toUpperCase()}</text>
+            {Array.from({ length: 60 }).map((_, t) => {
+              const a = t * 6, [x0, y0] = pt(a, R - 34), [x1, y1] = pt(a, R - (t % 5 ? 28 : 24))
+              const on = t / 60 < reading * dev
+              return <line key={t} x1={x0} y1={y0} x2={x1} y2={y1} className={`wh-tick ${on ? 'on' : ''}`} style={{ stroke: on && L ? L.colour : undefined, transitionDelay: `${(t / 60) * 0.9}s` }} />
+            })}
+            <text x={C} y={C - 30} className="wh-hub-sub" textAnchor="middle">{(centre.length > 18 ? centre.slice(0, 17) + '…' : centre).toUpperCase()}</text>
+            <text x={C} y={C + 12} className="wh-hub" textAnchor="middle">{Math.round(reading * 100 * dev)}%</text>
+            <text x={C} y={C + 34} className="wh-hub-sub" textAnchor="middle" style={{ fill: L ? L.colour : 'var(--fg-2)' }}>{centreSub.toUpperCase()}</text>
           </g>
         </g>
       </svg>
 
-      {!F && <p className="spec wh-hint">{hov >= 0 ? 'Open the sector' : 'Point at a sector'}</p>}
+      {!F && <p className="spec wh-hint">{hov >= 0 ? `Open ${sectors[hov].name}` : 'Point at a craft'}</p>}
 
       <AnimatePresence mode="wait">
         {F && selected && (
           <motion.div key={selected.key} className="wh-panel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}>
-            {selected.kind === 'film' ? <FilmCard f={film(selected.f.id)} via={selected.b} sector={F} kept={keptSet.has(selected.f.id)} onOpen={onOpen} /> : <PersonCard b={selected.b} sector={F} onPick={(k) => setSel(k)} />}
+            {selected.kind === 'craft' ? <CraftCard s={F} onOpen={onOpen} onPick={(k) => setSel(k)} /> : selected.kind === 'film' ? <FilmCard f={film(selected.f.id)} via={selected.b} sector={F} kept={keptSet.has(selected.f.id)} onOpen={onOpen} /> : <PersonCard b={selected.b} sector={F} onPick={(k) => setSel(k)} />}
           </motion.div>
         )}
       </AnimatePresence>
@@ -243,6 +283,32 @@ function Node({ x, y, r, counter, colour, img, clip, kept, person, text, strong,
         {on && label && <text className="wh-label" y={r + 18} textAnchor="middle">{label.toUpperCase().slice(0, 26)}</text>}
       </g>
     </g>
+  )
+}
+
+function CraftCard({ s, onOpen, onPick }) {
+  const [, name, line] = stageOf(s.known)
+  const nf = s.next ? film(s.next.id) : null
+  return (
+    <div className="wh-card craft">
+      <div className="wh-meter" style={{ '--c': s.colour }}>
+        <b className="numeral">{Math.round(s.known * 100)}%</b>
+        <span className="wh-bars">{[0, 1, 2, 3, 4].map((i) => <i key={i} className={s.known > i / 5 + 0.04 ? 'on' : ''} />)}</span>
+      </div>
+      <div className="wh-body">
+        <span className="spec" style={{ color: s.colour }}>{s.name} · {name}</span>
+        <b className="wh-title">{line}</b>
+        {nf ? (
+          <>
+            <p className="wh-why">To develop it further: {nf.t}, with {s.next.b.who}. Keep it or rate it.</p>
+            <div className="wh-acts">
+              {onOpen && <button className="btn" onClick={() => onOpen(nf)}>Open {nf.t.length > 22 ? 'the film' : nf.t} <span className="arr"><Arrow /></span></button>}
+              <button className="link-spec" onClick={() => onPick(`${s.key}:${s.next.b.who}:${nf.id}`)}>Show on the wheel</button>
+            </div>
+          </>
+        ) : <p className="wh-why">Every film on these branches is already in your reel.</p>}
+      </div>
+    </div>
   )
 }
 

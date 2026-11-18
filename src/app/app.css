@@ -285,3 +285,6 @@
   .hr-grid, .lib-grid { grid-template-columns: repeat(4, 1fr); }
   .vf-stage { aspect-ratio: 16 / 10; }
 }
+
+.ya-sub { margin: 6px 0 0; color: var(--fg-2); font-size: 14px; }
+.ya-read b { color: var(--fg); font-size: 12px; margin-right: 2px; }
