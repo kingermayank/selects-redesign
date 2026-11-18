@@ -413,7 +413,7 @@ function Import({ s, next }) {
           </form>
           <AnimatePresence initial={false}>
             {phase !== 'idle' && (
-              <motion.div key="transfer" className="imp-transfer" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}>
+              <motion.div key="transfer" className="imp-transfer" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto', transition: { height: { duration: 0.8, ease: [0.65, 0, 0.35, 1] }, opacity: { duration: 0.5, delay: 0.25 } } }} exit={{ opacity: 0, height: 0, transition: { height: { duration: 0.6, ease: [0.65, 0, 0.35, 1] }, opacity: { duration: 0.2 } } }}>
               <div className="bridge" aria-hidden="true">
                 <span className="bridge-end" ref={from}><LbDots size={22} /></span>
                 <span className="bridge-line"><i /></span>

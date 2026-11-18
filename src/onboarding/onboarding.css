@@ -258,4 +258,3 @@
 }
 @media (max-width: 560px) { .imp-form { grid-template-columns: 1fr; } }
 
-@media (min-width: 981px) { .ob-import .imp { min-height: 400px; justify-content: flex-start; } }
