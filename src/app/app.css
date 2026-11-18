@@ -288,3 +288,22 @@
 
 .ya-sub { margin: 6px 0 0; color: var(--fg-2); font-size: 14px; }
 .ya-read b { color: var(--fg); font-size: 12px; margin-right: 2px; }
+
+/* ── the print: four stories ─────────────────────────────── */
+.story { display: flex; flex-direction: column; gap: 22px; }
+.story-rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 1080px; }
+.story-card { position: relative; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.story-card canvas { width: 100%; height: auto; aspect-ratio: 9 / 16; display: block; background: #111113; box-shadow: 0 0 0 1px var(--line), 0 30px 60px -30px rgba(0,0,0,.9); opacity: 0; transition: opacity .6s var(--ease), box-shadow .35s; }
+.story-card canvas.ready { opacity: 1; }
+.story-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; aspect-ratio: 9 / 16; background: linear-gradient(100deg, transparent 30%, rgba(239,237,233,.05) 50%, transparent 70%) #111113; background-size: 250% 100%; animation: shimmer 1.4s linear infinite; z-index: -1; }
+.story-card.on canvas { box-shadow: 0 0 0 2px var(--select), 0 30px 60px -24px rgba(255,59,20,.35); }
+.story-card .story-n { transition: color .3s; }
+.story-card.on .story-n { color: var(--fg); }
+.story-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.story-note { margin-left: 8px; }
+@media (max-width: 900px) {
+  .story-rail { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 calc(var(--gutter) * -1); padding: 4px var(--gutter) 8px; }
+  .story-card { flex: 0 0 64%; scroll-snap-align: center; }
+  .story-acts .btn { flex: 1 1 100%; }
+  .story-note { margin: 0; }
+}

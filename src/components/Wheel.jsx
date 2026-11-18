@@ -369,3 +369,10 @@ function DotField({ focus }) {
   }, [])
   return <canvas ref={cv} className={`wh-dots-bg ${focus ? 'zoom' : ''}`} aria-hidden="true" />
 }
+
+/* The same reading the wheel shows, without the wheel: used by the shareable stories. */
+export function readings(ids, kept, signals, you = '#3A6E85') {
+  const sectors = build(wheel(ids), you)
+  const known = expose(sectors, new Set(kept), signals || { kept: kept.length })
+  return { sectors, known }
+}
