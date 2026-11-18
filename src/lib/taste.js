@@ -152,14 +152,14 @@ export function yourColour(ids) {
 
 /* ── the archetype: the negative every print comes from ────── */
 export const ARCHETYPES = {
-  NOCTURNALIST: { hue: '#3A6E85', line: 'You watch at night, and you go back to the same six people.', tell: 'Sodium light, wet streets, men who are good at their jobs.' },
-  PROCEDURALIST: { hue: '#6B7A4F', line: 'You like watching people be good at their jobs.', tell: 'Process over plot. Show me the method.' },
-  FORMALIST: { hue: '#8C8270', line: 'You came for the frame. Story is a courtesy.', tell: 'Long takes, held breath, a shot you can hang on a wall.' },
-  ROMANTIC: { hue: '#A23A2E', line: 'You want to be wrecked, gently, by eleven.', tell: 'Two people, one city, the wrong timing.' },
-  MAXIMALIST: { hue: '#C7772A', line: 'Bigger screen, louder room, no notes.', tell: '70mm or nothing. The seat should shake.' },
-  ARCHIVIST: { hue: '#6F8796', line: 'You trust what happened over what was written.', tell: 'Real people, real rooms, no score telling you how to feel.' },
-  DREAMER: { hue: '#3F7F6E', line: 'You go to the movies to leave the planet.', tell: 'Other worlds, drawn or built, and the people who live there.' },
-  NERVE: { hue: '#6A2438', line: 'You like being frightened by people who know exactly what they are doing.', tell: 'Dread as craft. The cut that lands a second late.' },
+  NOCTURNALIST: { hue: '#3A6E85', sigil: 'tight', line: 'You watch at night, and you go back to the same six people.', tell: 'Sodium light, wet streets, men who are good at their jobs.', hour: '11:40 PM', seat: 'Back row, aisle', ritual: 'Heat, once a year' },
+  PROCEDURALIST: { hue: '#6B7A4F', sigil: 'climb', line: 'You like watching people be good at their jobs.', tell: 'Process over plot. Show me the method.', hour: '9:15 PM', seat: 'Row G, centre', ritual: 'Pauses to check the timeline' },
+  FORMALIST: { hue: '#8C8270', sigil: 'wide', line: 'You came for the frame. Story is a courtesy.', tell: 'Long takes, held breath, a shot you can hang on a wall.', hour: '2:00 PM matinee', seat: 'Dead centre', ritual: 'Counts the cuts' },
+  ROMANTIC: { hue: '#A23A2E', sigil: 'pair', line: 'You want to be wrecked, gently, by eleven.', tell: 'Two people, one city, the wrong timing.', hour: '10:30 PM', seat: 'Two seats, one armrest', ritual: 'Stays through the credits' },
+  MAXIMALIST: { hue: '#C7772A', sigil: 'fan', line: 'Bigger screen, louder room, no notes.', tell: '70mm or nothing. The seat should shake.', hour: '7:00 PM, IMAX', seat: 'Row D, the one that shakes', ritual: 'Earplugs, never used' },
+  ARCHIVIST: { hue: '#6F8796', sigil: 'stack', line: 'You trust what happened over what was written.', tell: 'Real people, real rooms, no score telling you how to feel.', hour: '8:00 PM', seat: 'Wherever the Q&A is', ritual: 'Reads the Wikipedia after' },
+  DREAMER: { hue: '#3F7F6E', sigil: 'open', line: 'You go to the movies to leave the planet.', tell: 'Other worlds, drawn or built, and the people who live there.', hour: 'Sunday, 10 AM', seat: 'The floor, close up', ritual: 'Rewatches with the sound up' },
+  NERVE: { hue: '#6A2438', sigil: 'strike', line: 'You like being frightened by people who know exactly what they are doing.', tell: 'Dread as craft. The cut that lands a second late.', hour: '1:00 AM, alone', seat: 'Back to the wall', ritual: 'Lights stay off' },
 }
 
 export function archetype(profile) {

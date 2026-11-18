@@ -5,7 +5,14 @@ import { Poster, useRoute } from '../components/ui.jsx'
 import { film, colour, poster, backdrop } from '../lib/films.js'
 import { scoreAll } from '../lib/taste.js'
 import { useStore } from '../lib/store.js'
-import { Bars } from './parts.jsx'
+import { Bars, EmptyReel } from './parts.jsx'
+
+const EMPTY = [
+  { title: 'No stubs torn yet.', sub: 'Tear one off tonight’s ticket and it lands here.', action: 'Open tonight’s ticket', to: 'home' },
+  { title: 'Nothing waiting.', sub: 'Films you save for the right night collect here.', action: 'Hunt a film', to: 'hunt' },
+  { title: 'Nothing logged.', sub: 'Rate a film with the five bars and it joins your strip.', action: 'Hunt a film', to: 'hunt' },
+  { title: 'Nothing struck.', sub: 'Generous. Strike what never landed and the ticket learns.', action: 'Retake the read', to: 'start' },
+]
 
 export default function Library() {
   const s = useStore()
@@ -25,7 +32,7 @@ export default function Library() {
   return (
     <div className="library">
       <header className="page-head">
-        <h1 className="verdict page-h">Everything you have kept.</h1>
+        <h1 className="verdict page-h">Your shelf.</h1>
       </header>
 
       <section className="lib-strip" onPointerLeave={() => setHov(-1)}>
@@ -36,7 +43,7 @@ export default function Library() {
               <img src={poster(f.id)} alt="" style={{ opacity: hov === i ? 1 : 0 }} />
             </motion.button>
           ))}
-          {!strip.length && <span className="spec">Empty</span>}
+          {!strip.length && <span className="spec">Your strip starts with the first film you keep</span>}
         </div>
       </section>
 
@@ -73,7 +80,7 @@ export default function Library() {
               </button>
             )
           })}
-          {!list.length && <div className="empty-card"><span className="spec">Nothing yet</span><button className="btn ghost" onClick={() => go('hunt')}>Hunt a film <Arrow /></button></div>}
+          {!list.length && <div className="lib-empty"><EmptyReel {...EMPTY[tab]} onAction={() => go(EMPTY[tab].to, { wipe: EMPTY[tab].to === 'start' })} /></div>}
         </motion.div>
       </AnimatePresence>
     </div>

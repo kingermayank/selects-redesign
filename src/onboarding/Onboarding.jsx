@@ -1,22 +1,24 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
-import { Arrow } from '../components/Icons.jsx'
+import { Arrow, LbDots } from '../components/Icons.jsx'
 import { motion, AnimatePresence, LayoutGroup, useMotionValue, animate } from 'framer-motion'
-import { Mark, Clap, BarProgress, Poster, Counter, Img, useRoute } from '../components/ui.jsx'
+import { Mark, Clap, BarProgress, Poster, Counter, Img, useRoute, SoundToggle } from '../components/ui.jsx'
 import Assembly from '../components/Assembly.jsx'
 import { films, film, wall, search, poster, backdrop, colour, ids as byTitles } from '../lib/films.js'
 import { scoreAll, archetype, yourColour, insights } from '../lib/taste.js'
 import { useStore, setState, getState, tick } from '../lib/store.js'
 import { createDevelop } from '../gl/develop.js'
+import { emit } from '../components/Motes.jsx'
+import { play, projector } from '../lib/sound.js'
 import { webglOK } from '../gl/reel.js'
 import './onboarding.css'
 
-const STEPS = ['splash', 'name', 'positive', 'negative', 'neutral', 'hour', 'import', 'reading', 'reveal', 'insights']
-const COUNTED = ['name', 'positive', 'negative', 'neutral', 'hour', 'import', 'reveal', 'insights']
-const MARK_FOR = { name: 'mark', positive: 'wide', negative: 'strike', neutral: 'fan', hour: 'rise', import: 'tight', reveal: 'mark', insights: 'mark' }
+const STEPS = ['splash', 'name', 'positive', 'negative', 'neutral', 'hour', 'import', 'reading', 'reveal']
+const COUNTED = ['name', 'positive', 'negative', 'neutral', 'hour', 'import', 'reveal']
+
 
 export default function Onboarding() {
   const s = useStore()
-  const [step, setStep] = useState('splash')
+  const [step, setStep] = useState(() => { const q = new URLSearchParams(location.search).get('step'); return STEPS.includes(q) ? q : 'splash' })
   const [dir, setDir] = useState(1)
   const { go } = useRoute()
   const idx = STEPS.indexOf(step)
@@ -40,7 +42,7 @@ export default function Onboarding() {
             <span className="ob-chev"><Arrow dir="left" /></span> {idx <= 1 ? 'Selects' : 'Back'}
           </button>
           <BarProgress total={COUNTED.length} at={ci} />
-          <span className="spec ob-count">{String(ci + 1).padStart(2, '0')} / {String(COUNTED.length).padStart(2, '0')}</span>
+          <span className="ob-right-top"><span className="spec ob-count">{String(ci + 1).padStart(2, '0')} / {String(COUNTED.length).padStart(2, '0')}</span><SoundToggle /></span>
         </header>
       )}
       <AnimatePresence mode="wait" custom={dir} initial={false}>
@@ -60,8 +62,7 @@ export default function Onboarding() {
           {step === 'hour' && <Hour s={s} next={next} />}
           {step === 'import' && <Import s={s} next={next} />}
           {step === 'reading' && <Reading s={s} next={next} />}
-          {step === 'reveal' && <Reveal s={s} next={next} />}
-          {step === 'insights' && <Insights s={s} next={finish} />}
+          {step === 'reveal' && <Reveal s={s} next={finish} />}
         </motion.main>
       </AnimatePresence>
     </div>
@@ -106,7 +107,7 @@ function Splash({ onDone }) {
       <motion.div className="splash-word" initial={{ opacity: 0, letterSpacing: '0.5em' }} animate={shut ? { opacity: 1, letterSpacing: '0.01em' } : {}} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}>
         SELECTS
       </motion.div>
-      <motion.p className="spec" initial={{ opacity: 0 }} animate={shut ? { opacity: 1 } : {}} transition={{ delay: 0.3, duration: 0.8 }}>The take worth keeping</motion.p>
+      <motion.p className="spec" initial={{ opacity: 0 }} animate={shut ? { opacity: 1 } : {}} transition={{ delay: 0.3, duration: 0.8 }}>Your taste, developed</motion.p>
     </div>
   )
 }
@@ -155,8 +156,13 @@ function Positive({ s, next }) {
     const seen = new Set([...picks, ...near.map((f) => f.id)])
     return [...picks.map(film), ...near, ...base.filter((f) => !seen.has(f.id))].slice(0, 39)
   }, [q, picks.join(',')])
-  const toggle = (id) => {
-    tick(picks.includes(id) ? 4 : 10)
+  const toggle = (id, el) => {
+    const on = picks.includes(id)
+    tick(on ? 4 : 10); play(on ? 'unpick' : 'pick')
+    if (!on && el) {
+      const slot = document.querySelectorAll('.tray-frame')[Math.min(picks.length, 4)]
+      slot && emit({ from: el, to: slot, n: 70, colour: '#ff3b14', spread: 0.15, dur: [0.45, 0.8], size: 1.4, arc: 0.2 })
+    }
     setState((st) => ({ positive: st.positive.includes(id) ? st.positive.filter((x) => x !== id) : [...st.positive, id].slice(-5) }))
   }
   return (
@@ -179,7 +185,7 @@ function Negative({ s, next }) {
   const base = useMemo(() => wall('negative').filter((f) => !s.positive.includes(f.id)), [])
   const list = q.trim() ? search(q, 36).filter((f) => !s.positive.includes(f.id)) : base.slice(0, 36)
   const toggle = (id) => {
-    tick(s.negative.includes(id) ? 4 : [10, 40, 10])
+    tick(s.negative.includes(id) ? 4 : [10, 40, 10]); play(s.negative.includes(id) ? 'unpick' : 'strike')
     setState((st) => ({ negative: st.negative.includes(id) ? st.negative.filter((x) => x !== id) : [...st.negative, id] }))
   }
   return (
@@ -222,7 +228,8 @@ function Wall({ list, picked, onPick, kind, label }) {
                 layout
                 key={f.id}
                 className={`w-item ${on ? 'on' : ''} ${kind}`}
-                onClick={() => onPick(f.id)}
+                onClick={(e) => onPick(f.id, e.currentTarget.querySelector('.poster'))}
+                data-sfx="none"
                 initial={{ opacity: 0, scale: 0.94 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ layout: { type: 'spring', stiffness: 260, damping: 30 }, opacity: { duration: 0.4, delay: Math.min(i, 18) * 0.02 } }}
@@ -282,7 +289,7 @@ const AXES = [
   { v: 'both', l: 'Both, depending on the night', sub: 'And I will tell you which', layout: 'fan' },
 ]
 function Neutral({ s, next }) {
-  const toggle = (v) => { tick(8); setState((st) => ({ axes: st.axes.includes(v) ? st.axes.filter((x) => x !== v) : [...st.axes.filter((x) => (v === 'both' ? false : x !== 'both')), v] })) }
+  const toggle = (v) => { tick(8); play(s.axes.includes(v) ? 'unpick' : 'pick'); setState((st) => ({ axes: st.axes.includes(v) ? st.axes.filter((x) => x !== v) : [...st.axes.filter((x) => (v === 'both' ? false : x !== 'both')), v] })) }
   return (
     <div className="ob-split">
       <Q layout="fan" title="What are you actually there for?" sub="Pick any." />
@@ -291,7 +298,7 @@ function Neutral({ s, next }) {
           {AXES.map((a, i) => {
             const on = s.axes.includes(a.v)
             return (
-              <motion.button key={a.v} className={`axis ${on ? 'on' : ''}`} onClick={() => toggle(a.v)} aria-pressed={on} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.07, duration: 0.7, ease: [0.16, 1, 0.3, 1] }} whileTap={{ scale: 0.985 }}>
+              <motion.button key={a.v} data-sfx="none" className={`axis ${on ? 'on' : ''}`} onClick={() => toggle(a.v)} aria-pressed={on} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.07, duration: 0.7, ease: [0.16, 1, 0.3, 1] }} whileTap={{ scale: 0.985 }}>
                 <span className="axis-mark"><Mark size={30} five layout={on ? a.layout : 'mark'} lit={on ? 2 : -1} ink={on ? 'var(--fg)' : 'var(--fg-4)'} /></span>
                 <span className="axis-txt"><b>{a.l}</b><span className="spec">{a.sub}</span></span>
                 <span className={`axis-check ${on ? 'on' : ''}`} />
@@ -319,7 +326,7 @@ function Hour({ s, next }) {
     let a = (Math.atan2(e.clientX - cx, -(e.clientY - cy)) * 180) / Math.PI
     a = Math.max(-120, Math.min(120, a))
     const nh = Math.round(clamp(((a + 120) / 240) * MAX) * 4) / 4
-    if (Math.floor(nh) !== Math.floor(h)) tick(5)
+    if (Math.floor(nh) !== Math.floor(h)) { tick(5); play('detent', { gap: 0.04 }) }
     setH(nh)
   }
   const real = (12 + h) % 24
@@ -364,29 +371,63 @@ function Hour({ s, next }) {
   )
 }
 
-/* ── 6 · IMPORT ────────────────────────────────────────────── */
+/* ── 6 · IMPORT: your Letterboxd, carried across ─────────────
+   Linking is a transfer you can watch: light leaves the three dots,
+   crosses the bridge, and lands in the five bars, one shelf at a time. */
+const SHELVES = [['Diary', 'every film, every date'], ['Ratings', 'half-stars included'], ['Likes', 'the hearts'], ['Watchlist', 'the ones you meant to']]
+const LB = ['#FF8000', '#00E054', '#40BCF4', '#efede9']
 function Import({ s, next }) {
   const [u, setU] = useState(s.letterboxd || '')
-  const [linked, setLinked] = useState(!!s.letterboxd)
-  const link = () => { if (!u.trim()) return; tick(12); setState({ letterboxd: u.trim().replace(/^@/, '') }); setLinked(true) }
+  const [phase, setPhase] = useState(s.letterboxd ? 'done' : 'idle')
+  const [row, setRow] = useState(s.letterboxd ? SHELVES.length : 0)
+  const from = useRef(null), to = useRef(null), timers = useRef([])
+  useEffect(() => () => timers.current.forEach(clearTimeout), [])
+  const later = (fn, ms) => timers.current.push(setTimeout(fn, ms))
+  const link = () => {
+    const name = u.trim().replace(/^@/, '').replace(/^.*letterboxd\.com\//i, '').replace(/\/.*$/, '')
+    if (!name || phase === 'linking') return
+    setU(name); setPhase('linking'); setRow(0); play('link'); tick(12)
+    SHELVES.forEach((_, i) => {
+      later(() => from.current && emit({ from: from.current, to: to.current, n: 46, colour: LB[i], spread: 0.3, dur: [0.55, 0.95], size: 1.5, arc: 0.18 }), i * 560)
+      later(() => { setRow(i + 1); play('detent'); tick(6) }, i * 560 + 760)
+    })
+    later(() => { setPhase('done'); setState({ letterboxd: name }); play('copy') }, SHELVES.length * 560 + 900)
+  }
+  const edit = (v) => { setU(v); if (phase === 'done') { setPhase('idle'); setRow(0); setState({ letterboxd: '' }) } }
   return (
     <div className="ob-split">
-      <Q layout="tight" kicker="Optional" title="I can read your last fifty in four seconds." lit={false} />
+      <Q layout="tight" kicker="Optional" title="Bring your Letterboxd. I read the diary, not the reviews." lit={false} />
       <div className="ob-right center">
-        <div className="imp">
-          <div className="imp-tile main">
-            <div className="imp-row"><b>Letterboxd</b>{linked && <motion.span className="spec lit" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}><i className="live-dot" /> Linked</motion.span>}</div>
-            <form className="imp-form" onSubmit={(e) => { e.preventDefault(); link() }}>
-              <label className="field">
-                <span className="pre">letterboxd.com/</span>
-                <input value={u} onChange={(e) => { setU(e.target.value); setLinked(false) }} placeholder="username" autoCapitalize="none" spellCheck={false} aria-label="Letterboxd username" />
-              </label>
-              <button className="btn ghost" type="submit" disabled={!u.trim() || linked}>{linked ? 'Linked' : 'Link'}</button>
-            </form>
+        <div className={`imp ${phase}`}>
+          <form className="imp-form" onSubmit={(e) => { e.preventDefault(); link() }}>
+            <label className="field">
+              <span className="pre"><LbDots className={phase === 'linking' ? 'busy' : ''} />letterboxd.com/</span>
+              <input value={u} onChange={(e) => edit(e.target.value)} placeholder="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-label="Letterboxd username" />
+            </label>
+            <button className={`btn ${phase === 'done' ? 'ghost' : ''}`} type="submit" disabled={!u.trim() || phase !== 'idle'} data-sfx="none">{phase === 'done' ? 'Linked' : 'Link'}</button>
+          </form>
+          <div className="bridge" aria-hidden="true">
+            <span className="bridge-end" ref={from}><LbDots size={22} /></span>
+            <span className="bridge-line"><i /></span>
+            <span className="bridge-end" ref={to}><Mark size={26} lit={phase === 'idle' ? -1 : 2} /></span>
           </div>
+          <ul className="shelves" aria-live="polite">
+            {SHELVES.map(([k, d], i) => {
+              const st = phase === 'idle' ? 'wait' : row > i ? 'in' : row === i ? 'now' : 'wait'
+              return (
+                <li key={k} className={`shelf ${st}`} style={{ '--c': LB[i] }}>
+                  <span className="shelf-k">{k}</span>
+                  <span className="shelf-d">{d}</span>
+                  <span className="shelf-bars">{[0, 1, 2, 3, 4].map((j) => <i key={j} style={{ transitionDelay: `${j * 70}ms` }} />)}</span>
+                  <span className="shelf-ok">{st === 'in' ? <svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5.2L4.2 8.4L11 1.6" stroke="currentColor" strokeWidth="1.6" fill="none" /></svg> : null}</span>
+                </li>
+              )
+            })}
+          </ul>
+          <p className="spec imp-note">{phase === 'done' ? `@${u} · ready to read` : phase === 'linking' ? 'Carrying it across' : 'Public profiles only. Nothing is posted.'}</p>
         </div>
       </div>
-      <CTA label={linked ? 'Read me' : 'Read my picks'} onClick={next} secondary={linked ? null : 'Skip for now'} onSecondary={next} lit />
+      <CTA label="Read me" onClick={next} lit />
     </div>
   )
 }
@@ -398,6 +439,7 @@ function Reading({ s, next }) {
   const reads = useMemo(() => scoreAll(s).slice(0, 24).map((e) => e.f), [])
   const total = s.positive.length + s.negative.length + reads.length
   const [fallback] = useState(() => !webglOK())
+  useEffect(() => projector(), [])
   useEffect(() => {
     let inst, dead = false
     if (fallback) {
@@ -414,7 +456,7 @@ function Reading({ s, next }) {
     return () => { dead = true; inst && inst.dispose() }
   }, [])
   const n = Math.round(p * total)
-  const phase = p < 0.2 ? 'Sampling your posters' : p < 0.55 ? 'Reading every frame' : p < 0.85 ? 'Developing the negative' : 'Fixing the print'
+  const phase = p < 0.2 ? 'Threading the film' : p < 0.6 ? 'Exposing your posters' : p < 0.85 ? 'Developing the negative' : 'Fixing the print'
   return (
     <div className="reading">
       {fallback ? (
@@ -433,58 +475,83 @@ function Reading({ s, next }) {
   )
 }
 
-/* ── 8 · REVEAL: the negative ──────────────────────────────── */
+/* ── 8 · REVEAL: the negative, and what it says ─────────────
+   The light from the Reading keeps travelling: it pours into your
+   colour first. The colour is the door to the read: open it and the
+   same light carries each line out to its own frame. */
 function Reveal({ s, next }) {
   const a = useMemo(() => archetype(s), [])
   const c = useMemo(() => yourColour(s.positive), [])
   const reads = useMemo(() => scoreAll(s).slice(0, 22).map((e) => e.f.id), [])
+  const list = useMemo(() => insights(s), [])
   const [stage, setStage] = useState(0)
-  useEffect(() => { const t = [setTimeout(() => setStage(1), 300), setTimeout(() => setStage(2), 1300)]; return () => t.forEach(clearTimeout) }, [])
+  const [open, setOpen] = useState(false)
+  const sw = useRef(null)
+  const card = useRef(null)
+  const cards = useRef([])
   useEffect(() => { setState({ colour: c, archetype: a.name }) }, [])
+  useEffect(() => {
+    // the stream from the gate arrives and fills the swatch from the bottom
+    const t = setTimeout(() => {
+      if (!sw.current) return
+      emit({
+        from: { x: innerWidth / 2 - 70, y: innerHeight + 10, w: 140, h: 30 }, to: sw.current, n: 220, colour: c, spread: 0.7, dur: [0.9, 1.5], arc: 0.25,
+        onArrive: (k) => sw.current && sw.current.style.setProperty('--fill', String(k)),
+        onDone: () => { setStage(1); play('develop'); setTimeout(() => setStage(2), 900) },
+      })
+    }, 120)
+    return () => clearTimeout(t)
+  }, [])
+  const read = () => {
+    if (open) return setOpen(false)
+    setOpen(true); play('pick')
+    // once the frames exist, send the colour out to each of them
+    setTimeout(() => cards.current.forEach((el, i) => el && emit({ from: sw.current, to: el, n: 26, colour: list[i] && list[i].sharp ? '#ff3b14' : c, spread: 0.15 + i * 0.07, dur: [0.55, 0.9], edge: true, size: 1.3 })), 60)
+  }
   return (
-    <div className="reveal" style={{ '--you': c }}>
+    <div className={`reveal ${open ? 'open' : ''}`} style={{ '--you': c }}>
       <div className="reveal-wash" />
-      <div className="reveal-graph">
-        <Assembly ids={[...s.positive, ...reads]} you={c} height={'100%'} youLabel={(s.name || 'YOU').toUpperCase()} />
-      </div>
       <div className="reveal-copy">
-        <p className="spec">Your negative</p>
+        <p className="spec">{(s.name || 'Your').toUpperCase()}{s.name ? '’S' : ''} NEGATIVE</p>
         <h1 className="reveal-name fit" aria-label={a.name} style={{ '--n': a.name.length }}>
           {a.name.split('').map((ch, i) => (
             <motion.span key={i} initial={{ opacity: 0, y: '0.4em', filter: 'blur(10px)' }} animate={stage >= 1 ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}} transition={{ delay: i * 0.045, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>{ch}</motion.span>
           ))}
         </h1>
         <motion.p className="reveal-line" initial={{ opacity: 0 }} animate={stage >= 2 ? { opacity: 1 } : {}} transition={{ duration: 0.9 }}>{a.line}</motion.p>
-        <motion.div className="reveal-meta" initial={{ opacity: 0, y: 10 }} animate={stage >= 2 ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.25, duration: 0.8 }}>
-          <span className="swatch" style={{ background: c }} />
-          <div><span className="spec">Your colour</span><b className="numeral">{c}</b></div>
-        </motion.div>
+        <motion.button ref={card} layout className={`colour-card ${open ? 'on' : ''}`} onClick={read} aria-expanded={open} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} data-sfx="none" data-cursor={open ? 'CLOSE' : 'READ'}>
+          <span ref={sw} className="cc-swatch" style={{ '--fill': 0 }}><i /></span>
+          <span className="cc-body">
+            <span className="spec">Your colour</span>
+            <b className="numeral">{c}</b>
+          </span>
+          <span className="cc-act">
+            <span className="cc-label">{open ? 'Hide the read' : `Read the negative`}</span>
+            <span className="spec">{list.length} frames</span>
+          </span>
+          <span className="cc-arr"><Arrow dir={open ? 'left' : 'right'} /></span>
+        </motion.button>
       </div>
-      <CTA label="Insights" onClick={next} />
-    </div>
-  )
-}
-
-/* ── 9 · INSIGHTS ──────────────────────────────────────────── */
-function Insights({ s, next }) {
-  const list = useMemo(() => insights(s), [])
-  const c = s.colour || yourColour(s.positive)
-  return (
-    <div className="ins" style={{ '--you': c }}>
-      <div className="ins-head">
-        <h1 className="q-h">{s.name ? `${s.name.split(' ')[0]}, here is what I read.` : 'Here is what I read.'}</h1>
-        <div className="ins-bars">{list.map((x, i) => <i key={i} className="bar-atom" style={{ color: x.sharp ? 'var(--select)' : 'var(--fg-3)' }} />)}</div>
+      <div className="reveal-right">
+        <AnimatePresence mode="wait" initial={false}>
+          {!open ? (
+            <motion.div key="graph" className="reveal-graph" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }} transition={{ duration: 0.4 }}>
+              <Assembly ids={[...s.positive, ...reads]} you={c} height={'100%'} youLabel={(s.name || 'YOU').toUpperCase()} />
+            </motion.div>
+          ) : (
+            <motion.div key="read" className="reveal-read" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+              {list.map((x, i) => (
+                <motion.article key={x.k} ref={(el) => (cards.current[i] = el)} className={`ins-card ${x.sharp ? 'sharp' : ''}`} initial={{ opacity: 0, y: 24, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' }} transition={{ delay: 0.35 + i * 0.07, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
+                  <span className="ins-top"><span className={`spec ${x.sharp ? 'lit' : ''}`}>{x.k}</span><span className="spec">{String(i + 1).padStart(2, '0')}</span></span>
+                  <b className="ins-big">{x.big}</b>
+                  <p>{x.line}</p>
+                </motion.article>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      <div className="ins-grid">
-        {list.map((x, i) => (
-          <motion.article key={x.k} className={`ins-card ${x.sharp ? 'sharp' : ''}`} initial={{ opacity: 0, y: 40, rotate: i % 2 ? 1.5 : -1.5 }} animate={{ opacity: 1, y: 0, rotate: 0 }} transition={{ delay: 0.12 + i * 0.09, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}>
-            <span className={`spec ${x.sharp ? 'lit' : ''}`}>{x.k}</span>
-            <b className="ins-big">{x.big}</b>
-            <p>{x.line}</p>
-          </motion.article>
-        ))}
-      </div>
-      <CTA label="Open the Assembly" onClick={next} lit />
+      <CTA label="Print tonight’s ticket" onClick={next} lit />
     </div>
   )
 }

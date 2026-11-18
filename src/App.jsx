@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { loadFilms } from './lib/films.js'
 import { Router, useRoute, Cursor, Mark } from './components/ui.jsx'
 import Landing from './landing/Landing.jsx'
+import { MotesLayer } from './components/Motes.jsx'
 const Onboarding = lazy(() => import('./onboarding/Onboarding.jsx'))
 const Shell = lazy(() => import('./app/Shell.jsx'))
 
@@ -31,16 +32,26 @@ export default function App() {
       ) : (
         <Boot />
       )}
+      <MotesLayer />
       <Cursor />
       <div className="grain" aria-hidden="true" />
     </Router>
   )
 }
 
+/* Loading: the lit bar runs the mark like film through a gate, and the counter threads. */
 function Boot() {
+  const [lit, setLit] = useState(2)
+  useEffect(() => {
+    const seq = [3, 4, 3, 2, 1, 0, 1, 2]
+    let k = 0
+    const id = setInterval(() => setLit(seq[k++ % seq.length]), 90)
+    return () => clearInterval(id)
+  }, [])
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'var(--base)' }}>
-      <Mark size={44} layout="tight" />
+    <div className="boot">
+      <Mark size={56} five lit={lit} hop />
+      <span className="spec">Threading</span>
     </div>
   )
 }

@@ -37,8 +37,10 @@ export default function Assembly({ ids, you = '#3A6E85', height = 520, onOpen, l
     let drag = null, hov = -1, born = intro ? 0 : 1, raf, t = 0, visible = true
     const scale = () => Math.min(W(), H()) * 0.42
 
-    const toScreen = (p) => [W() / 2 + p.x * scale() * (W() > H() ? 1.35 : 1), H() / 2 + p.y * scale()]
-    const fromScreen = (sx, sy) => ({ x: (sx - W() / 2) / (scale() * (W() > H() ? 1.35 : 1)), y: (sy - H() / 2) / scale() })
+    // keep every star (and most of its label) inside the panel
+    const sx = () => Math.min(W() / 2 - (W() > 520 ? 110 : 28), scale() * (W() > H() ? 1.35 : 1))
+    const toScreen = (p) => [W() / 2 + p.x * sx(), H() / 2 + p.y * scale()]
+    const fromScreen = (x, y) => ({ x: (x - W() / 2) / sx(), y: (y - H() / 2) / scale() })
 
     const step = () => {
       const k = 0.00042
@@ -115,7 +117,9 @@ export default function Assembly({ ids, you = '#3A6E85', height = 520, onOpen, l
       }
       // nodes
       const placed = []
-      const free = (x, y, w) => !placed.some((r) => x < r.x + r.w + 6 && x + w + 6 > r.x && Math.abs(y - r.y) < 13)
+      const pts = sim.map((n) => toScreen(n))
+      // a label goes down only where it covers no other label and no other star
+      const free = (x, y, w, self) => !placed.some((r) => x < r.x + r.w + 6 && x + w + 6 > r.x && Math.abs(y - r.y) < 13) && !pts.some(([px, py], j) => j !== self && px > x - 5 && px < x + w + 5 && Math.abs(py - y) < 9)
       sim.forEach((n, i) => {
         const [x, y] = toScreen(n)
         const dim = lit && !lit.has(i)
@@ -133,10 +137,11 @@ export default function Assembly({ ids, you = '#3A6E85', height = 520, onOpen, l
           g.font = '500 9px "Martian Mono", monospace'
           const txt = n.f.t.toUpperCase().slice(0, 26)
           const tw = g.measureText(txt).width
-          if (free(x + r + 7, y, tw)) {
-            placed.push({ x: x + r + 7, y, w: tw })
+          const lx = x + r + 7 + tw > W() - 6 ? x - r - 7 - tw : x + r + 7
+          if (lx > 4 && free(lx, y, tw, i)) {
+            placed.push({ x: lx, y, w: tw })
             g.fillStyle = i === hov ? '#efede9' : 'rgba(168,166,161,0.8)'
-            g.fillText(txt, x + r + 7, y + 3)
+            g.fillText(txt, lx, y + 3)
           }
         }
         g.globalAlpha = 1

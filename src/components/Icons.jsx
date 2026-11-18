@@ -83,3 +83,14 @@ export function Arrow({ dir = 'right', className = '' }) {
     </svg>
   )
 }
+
+/* Letterboxd's three dots, used only to say "this field is your Letterboxd". They part when the field is focused. */
+export function LbDots({ size = 14, className = '' }) {
+  return (
+    <svg className={`lb-dots ${className}`} width={size * 2.1} height={size} viewBox="0 0 29 14" aria-hidden="true">
+      <circle className="d0" cx="7" cy="7" r="5.6" fill="#FF8000" />
+      <circle className="d2" cx="22" cy="7" r="5.6" fill="#40BCF4" />
+      <circle className="d1" cx="14.5" cy="7" r="5.6" fill="#00E054" />
+    </svg>
+  )
+}

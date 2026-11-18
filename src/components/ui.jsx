@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback, createContext, useContext } from 'react'
 import { motion, animate, useInView, AnimatePresence } from 'framer-motion'
 import { poster, syncSrc, resolveSrc } from '../lib/films.js'
+import { play, soundOn, setSound } from '../lib/sound.js'
+import { useStore } from '../lib/store.js'
 
 /* ─────────────────────────────────────────────────────────────
    THE MARK — five bars, one lit. Everything after the splash is
@@ -23,6 +25,12 @@ const LAYOUTS = {
   fan: (i) => ({ dx: 0, dy: Math.abs(i - 2) * 4, rotate: (i - 2) * 10, scaleY: 1 }),
   strike: (i) => (i === 2 ? { dx: -6, dy: 4, rotate: 52, scaleY: 1.12 } : { dx: 0, dy: 0, rotate: 0, scaleY: 1 }),
   rise: (i) => ({ dx: 0, dy: 0, rotate: 0, scaleY: [0.62, 0.8, 1, 0.8, 0.62][i] }),
+  // two bars lean in to each other; the rest hold back
+  pair: (i) => (i === 1 ? { dx: 10, dy: 0, rotate: 9, scaleY: 1 } : i === 2 ? { dx: -2, dy: 0, rotate: -9, scaleY: 1 } : { dx: 0, dy: 0, rotate: 0, scaleY: 0.42 }),
+  // film cans on a shelf: every bar lies down
+  stack: (i) => ({ dx: 30 - i * 24, dy: -i * 19 + 4, rotate: -76.5, scaleY: 0.66 }),
+  // a staircase climbing into the dark
+  climb: (i) => ({ dx: 0, dy: 0, rotate: 0, scaleY: 0.32 + i * 0.17 }),
 }
 function barCoords(g, i, { dx, dy, rotate, scaleY }) {
   const x0 = i * g.pitch
@@ -38,9 +46,9 @@ function barCoords(g, i, { dx, dy, rotate, scaleY }) {
 const toPts = (a) => `${a[0].toFixed(2)},${a[1].toFixed(2)} ${a[2].toFixed(2)},${a[3].toFixed(2)} ${a[4].toFixed(2)},${a[5].toFixed(2)} ${a[6].toFixed(2)},${a[7].toFixed(2)}`
 
 /* The mark. `size` is its height in px; width follows the geometry. */
-export function Mark({ size = 40, layout = 'mark', lit, litColour = 'var(--select)', ink = 'var(--fg)', className = '', style, spring, five = false }) {
+export function Mark({ size = 40, layout = 'mark', lit, litColour = 'var(--select)', ink = 'var(--fg)', className = '', style, spring, five = false, hop = false }) {
   const g = size < 48 && layout === 'mark' && !five ? THREE : FIVE
-  const litAt = lit === undefined ? g.lit : g === THREE && lit === 2 ? 1 : lit
+  const litAt = lit === undefined ? g.lit : g === THREE && lit === 2 && !hop ? 1 : lit
   const L = LAYOUTS[layout] || LAYOUTS.mark
   const polys = useRef([])
   const cur = useRef(null)
@@ -61,18 +69,48 @@ export function Mark({ size = 40, layout = 'mark', lit, litColour = 'var(--selec
   return (
     <svg className={className} style={{ display: 'block', flex: 'none', ...style }} width={(size * vw) / 100} height={size} viewBox={`0 0 ${vw.toFixed(2)} 100`} aria-hidden="true" overflow="visible">
       {cur.current.map((pts, i) => (
-        <polygon key={`${g.n}-${i}`} ref={(el) => (polys.current[i] = el)} points={toPts(pts)} style={{ fill: i === litAt ? litColour : ink, transition: 'fill .45s cubic-bezier(.22,1,.36,1)' }} />
+        <polygon key={`${g.n}-${i}`} ref={(el) => (polys.current[i] = el)} points={toPts(pts)} style={{ fill: i === litAt ? litColour : ink, transform: hop && i === litAt ? 'translateY(-9px)' : 'none', transition: hop ? 'fill .16s linear, transform .22s cubic-bezier(.34,1.56,.64,1)' : 'fill .45s cubic-bezier(.22,1,.36,1), transform .4s cubic-bezier(.22,1,.36,1)' }} />
       ))}
     </svg>
   )
 }
 
-/* Lockup, in the Figma proportions: wordmark cap height 0.55 of the mark, gap 0.375. */
+/* Lockup, in the Figma proportions: wordmark cap height 0.55 of the mark, gap 0.375.
+   Hover: the lit bar runs the length of the mark like a frame through a gate, then settles home. */
+const CHASE = { 3: [2, 1, 0, 1], 5: [3, 4, 3, 2, 1, 0, 1, 2] }
+export function useChase(n = 3) {
+  const [lit, setLit] = useState(undefined)
+  const timer = useRef(0)
+  const run = () => {
+    clearInterval(timer.current)
+    const seq = CHASE[n]
+    let k = 0
+    timer.current = setInterval(() => {
+      setLit(seq[k % seq.length]); k++
+      if (k > seq.length * 2) { clearInterval(timer.current); setLit(undefined) }
+    }, 70)
+  }
+  const stop = () => { clearInterval(timer.current); setLit(undefined) }
+  useEffect(() => () => clearInterval(timer.current), [])
+  return { lit, run, stop, hop: lit !== undefined }
+}
 export function Lockup({ size = 22, className = '', onClick }) {
+  const n = size < 48 ? 3 : 5
+  const c = useChase(n)
   return (
-    <button className={`lockup ${className}`} onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.375, minHeight: 44 }} aria-label="Selects home">
-      <Mark size={size} />
+    <button className={`lockup ${className}`} onClick={onClick} onPointerEnter={(e) => e.pointerType === 'mouse' && c.run()} onPointerLeave={c.stop} style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.375, minHeight: 44 }} aria-label="Selects home">
+      <Mark size={size} lit={c.lit} hop={c.hop} />
       <span className="lockup-word" style={{ fontSize: size * 0.78 }}>SELECTS</span>
+    </button>
+  )
+}
+
+/* Sound on/off: five bars that play like a meter while sound is on, and lie flat when it is off. */
+export function SoundToggle({ className = '' }) {
+  const on = useStore((s) => s.sound !== false)
+  return (
+    <button className={`sound-t ${on ? 'on' : ''} ${className}`} onClick={() => setSound(!on)} aria-pressed={on} aria-label={on ? 'Sound on' : 'Sound off'} data-sfx="none" data-cursor={on ? 'MUTE' : 'SOUND'}>
+      {[0, 1, 2, 3, 4].map((i) => <i key={i} style={{ '--d': `${[0.12, 0.42, 0, 0.3, 0.2][i]}s` }} />)}
     </button>
   )
 }
@@ -84,8 +122,9 @@ export function Clap({ size = 120, onDone, delay = 0.25 }) {
   useEffect(() => {
     const t1 = setTimeout(() => setState('mark'), delay * 1000 + 420)
     const t2 = setTimeout(() => { setLit(2); tickFlash() }, delay * 1000 + 640)
+    const t0 = setTimeout(() => play('clap'), delay * 1000 + 440)
     const t3 = setTimeout(() => onDone && onDone(), delay * 1000 + 1500)
-    return () => [t1, t2, t3].forEach(clearTimeout)
+    return () => [t0, t1, t2, t3].forEach(clearTimeout)
   }, [])
   return (
     <motion.div
@@ -260,10 +299,11 @@ export function Router({ children }) {
       if (to === '' || to === 'top') history.pushState(null, '', location.pathname + location.search)
       else location.hash = to
       setRoute(to === 'top' ? '' : to)
-      window.scrollTo(0, 0)
+      // inside the app the outgoing page fades in place and the shell scrolls once it is gone
+      if (wipe || !/^(home|hunt|library|you|film-\d+)$/.test(to)) window.scrollTo(0, 0)
     }
     if (!wipe || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply()
-    setSlate({ phase: 'in', apply })
+    play('whoosh'); setSlate({ phase: 'in', apply })
   }, [])
   return (
     <RouteCtx.Provider value={{ route, go }}>

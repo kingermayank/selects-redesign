@@ -66,3 +66,20 @@ export function Bars({ value = 0, max = 5, size = 14, lit = true, onChange }) {
     </span>
   )
 }
+
+/* Empty: a short run of blank film. One frame waits with the lit bar in it,
+   and the gate light sweeps across looking for something to expose. */
+export function EmptyReel({ title, sub, action, onAction, kicker }) {
+  return (
+    <div className="empty-reel">
+      <div className="er-strip" aria-hidden="true">
+        {[0, 1, 2, 3, 4].map((i) => <span key={i} className={`er-frame ${i === 2 ? 'lit' : ''}`}>{i === 2 && <i className="bar-atom" />}</span>)}
+        <span className="er-sweep" />
+      </div>
+      {kicker && <span className="spec">{kicker}</span>}
+      <b className="er-t">{title}</b>
+      {sub && <p className="er-s">{sub}</p>}
+      {action && <button className="btn ghost" onClick={onAction}>{action} <span className="arr"><Arrow /></span></button>}
+    </div>
+  )
+}

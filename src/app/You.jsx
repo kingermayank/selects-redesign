@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Arrow } from '../components/Icons.jsx'
 import { motion } from 'framer-motion'
 import Assembly from '../components/Assembly.jsx'
@@ -6,6 +6,8 @@ import { Counter, Mark, useRoute } from '../components/ui.jsx'
 import { film, poster } from '../lib/films.js'
 import { scoreAll, insights, thread } from '../lib/taste.js'
 import { useStore, reset, setState } from '../lib/store.js'
+import { play } from '../lib/sound.js'
+import { emit } from '../components/Motes.jsx'
 
 export default function You({ arch }) {
   const s = useStore()
@@ -14,9 +16,23 @@ export default function You({ arch }) {
   const reads = useMemo(() => scoreAll(s).slice(0, 24).map((e) => e.f.id), [s.positive.join(','), s.negative.join(',')])
   const ins = useMemo(() => insights(s), [s.positive.join(','), s.negative.join(','), s.hour, s.axes.join(',')])
   const th = useMemo(() => thread([...s.positive, ...reads]), [reads])
-  const [copied, setCopied] = useState(false)
-  const line = `${arch ? arch.name : 'My negative'} · ${c} · ${s.positive.map((id) => film(id)?.t).filter(Boolean).slice(0, 3).join(' / ')} — selects`
-  const copy = async () => { try { await navigator.clipboard.writeText(line); setCopied(true); setTimeout(() => setCopied(false), 1800) } catch { setCopied(false) } }
+  // copying is a splice you can see: the line is selected, the light carries it to the button, the button confirms
+  const [copied, setCopied] = useState(0) // 0 idle · 1 selecting · 2 copied
+  const lineRef = useRef(null), btnRef = useRef(null), printRef = useRef(null)
+  const line = `${arch ? arch.name : 'My negative'} · ${c} · ${s.positive.map((id) => film(id)?.t).filter(Boolean).slice(0, 3).join(' / ')} · selects`
+  const copy = () => {
+    if (copied) return
+    setCopied(1)
+    const fallback = () => {
+      // no clipboard access: leave a real selection the person can copy by hand
+      const r = document.createRange(); r.selectNodeContents(lineRef.current); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r)
+    }
+    try { navigator.clipboard.writeText(line).catch(fallback) } catch { fallback() }
+    setTimeout(() => {
+      emit({ from: lineRef.current, to: btnRef.current, n: 60, colour: '#ff3b14', spread: 0.2, dur: [0.4, 0.7], size: 1.3, onDone: () => { setCopied(2); play('copy') } })
+    }, 380)
+    setTimeout(() => setCopied(0), 3200)
+  }
   const hour = s.hour ?? 22
 
   return (
@@ -73,8 +89,11 @@ export default function You({ arch }) {
             </div>
           </motion.div>
           <div className="print-side">
-            <button className="btn" onClick={copy}>{copied ? 'Copied' : 'Copy the line'} <span className="arr"><Arrow /></span></button>
-            <code className="print-line">{line}</code>
+            <code className={`print-line ${copied ? 'sel' : ''}`} ref={lineRef}><span>{line}</span></code>
+            <button ref={btnRef} className={`btn copy-btn ${copied === 2 ? 'done' : ''}`} onClick={copy} data-sfx="secondary">
+              <span className="cb-a">Copy the line <span className="arr"><Arrow /></span></span>
+              <span className="cb-b" aria-hidden={copied !== 2}><svg width="14" height="11" viewBox="0 0 12 10"><path d="M1 5.2L4.2 8.4L11 1.6" stroke="currentColor" strokeWidth="1.8" fill="none" /></svg> On your clipboard</span>
+            </button>
           </div>
         </div>
       </section>

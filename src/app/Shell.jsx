@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Arrow } from '../components/Icons.jsx'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lockup, useRoute } from '../components/ui.jsx'
+import { Lockup, useRoute, SoundToggle } from '../components/ui.jsx'
 import { TabIcon } from '../components/Icons.jsx'
 import { useStore, setState, getState } from '../lib/store.js'
 import { yourColour, archetype } from '../lib/taste.js'
@@ -49,6 +49,7 @@ export default function Shell() {
             </button>
           ))}
         </nav>
+        <div className="rail-foot"><span className="spec">Sound</span><SoundToggle /></div>
         <div className="rail-you" onClick={() => go('you')} role="button" tabIndex={0}>
           <span className="rail-swatch" style={{ background: colour }}>{(s.name || 'Y').slice(0, 1).toUpperCase()}</span>
           <div>
@@ -60,22 +61,23 @@ export default function Shell() {
 
       <header className="topbar">
         <Lockup size={18} onClick={() => go('', { wipe: true })} />
-        <button className="top-you" onClick={() => go('you')} style={{ background: colour }} aria-label="You">{(s.name || 'Y').slice(0, 1).toUpperCase()}</button>
+        <span className="top-end"><SoundToggle /><button className="top-you" onClick={() => go('you')} style={{ background: colour }} aria-label="You">{(s.name || 'Y').slice(0, 1).toUpperCase()}</button></span>
       </header>
 
       <main className="app-main">
         {s.sample && !s.onboarded && (
           <div className="sample">
-            <span className="spec">Sample read</span>
+            <span className="spec">You are looking at a sample read</span>
             <button className="link-spec lit-link" onClick={() => go('start', { wipe: true })}>Make it yours <Arrow /></button>
           </div>
         )}
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
           <motion.div
             key={filmId ? `film-${filmId}` : tab}
-            initial={{ opacity: 0, y: filmId ? 40 : 12 }}
+            className="page"
+            initial={{ opacity: 0, y: filmId ? 32 : 14 }}
             animate={{ opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } }}
-            exit={{ opacity: 0, y: -8, transition: { duration: 0.18 } }}
+            exit={{ opacity: 0, y: -6, filter: 'blur(4px)', transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } }}
           >
             {filmId ? <Film id={filmId} /> : tab === 'hunt' ? <Hunt /> : tab === 'library' ? <Library /> : tab === 'you' ? <You arch={arch} /> : <Home arch={arch} />}
           </motion.div>

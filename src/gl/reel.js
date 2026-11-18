@@ -61,7 +61,7 @@ export async function createReel(canvas, { images, portrait = false, onReady } =
           float ang = atan(p.x, -p.y);
           float cone = smoothstep(0.42, 0.0, abs(ang - 0.62)) ;
           float fall = smoothstep(1.3, 0.0, length(p));
-          float flick = 0.92 + 0.08 * sin(uTime * 37.0) * sin(uTime * 11.0);
+          float flick = 0.97 + 0.03 * sin(uTime * 0.9);
           float rays = 0.75 + 0.25 * sin(ang * 90.0 + uTime * 0.6);
           vec3 c = vec3(0.86, 0.89, 1.0) * cone * fall * rays * 0.028 * flick;
           gl_FragColor = vec4(c, 1.0);
@@ -80,6 +80,9 @@ export async function createReel(canvas, { images, portrait = false, onReady } =
   const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), mobile ? 0.45 : 0.55, 0.5, 0.8)
   composer.addPass(bloom)
   const finish = new ShaderPass(FinishShader)
+  // the hero holds steady: no brightness flicker, no gate weave
+  finish.uniforms.uFlicker.value = 0
+  finish.uniforms.uWeave.value = 0
   composer.addPass(finish)
   composer.addPass(new OutputPass())
 
@@ -95,14 +98,18 @@ export async function createReel(canvas, { images, portrait = false, onReady } =
   let hasPointer = false
   const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
 
+  let lastW = 0, lastH = 0
   function resize() {
     const w = canvas.clientWidth || innerWidth
     const h = canvas.clientHeight || innerHeight
+    if (w === lastW && Math.abs(h - lastH) < 2) return
+    lastW = w; lastH = h
     renderer.setSize(w, h, false)
     composer.setSize(w, h)
     bloom.resolution.set(w * 0.5, h * 0.5)
     camera.aspect = w / h
     camera.updateProjectionMatrix()
+    composer.render() // repaint now, so a resize never shows a cleared (black) canvas
   }
   resize()
   const ro = new ResizeObserver(resize)

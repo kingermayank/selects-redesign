@@ -55,7 +55,7 @@ export function edgeTexture() {
   g.fillStyle = '#fff'
   g.font = '600 30px "Martian Mono", ui-monospace, monospace'
   g.textBaseline = 'middle'
-  const words = ['SELECTS 5219', '24A', '25', 'SAFETY FILM', '26', 'THE TAKE WORTH KEEPING', '27A']
+  const words = ['SELECTS 5219', '24A', '25', 'SAFETY FILM', '26', 'CUT FROM YOUR DIARY', '27A']
   let x = 20
   let i = 0
   while (x < c.width) {
@@ -95,6 +95,12 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
       uFrameLen: { value: frameLen },
       uWidth: { value: width },
       uLight: { value: new THREE.Vector3(-0.4, 0.8, 0.6).normalize() },
+      // exposure (the Reading): frames whose content passed the gate inside [uExpLo, uExpHi] carry an image
+      uExpOn: { value: 0 },
+      uExpLo: { value: 0 },
+      uExpHi: { value: 0 },
+      uGateU: { value: 0 },
+      uRim: { value: 0.42 },
     },
     vertexShader: /* glsl */ `
       attribute vec3 aTangent;
@@ -116,6 +122,7 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
       precision highp float;
       uniform sampler2D uAtlas; uniform sampler2D uEdge;
       uniform float uCount, uCols, uRows, uOffset, uTime, uBright, uFrameLen, uWidth;
+      uniform float uExpOn, uExpLo, uExpHi, uGateU, uRim;
       uniform vec2 uFog; uniform vec3 uFogColor; uniform vec3 uLight;
       varying vec2 vUv; varying vec3 vN; varying vec3 vView; varying float vDepth; varying float vDev; varying vec3 vWorld;
       ${NOISE}
@@ -166,6 +173,15 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
         pos = pow(pos, vec3(0.92)) * 1.06;
         float front = smoothstep(0.0, 0.08, vDev * 1.25 - n * 0.55) - dev;
         vec3 pic = mix(neg, pos, dev) + front * vec3(1.0, 0.98, 0.94) * 0.8;
+        if (uExpOn > 0.5) {
+          // unexposed leader below the window; the image burns in as the frame crosses the gate
+          float fc = fid + 0.5;
+          float ex = smoothstep(uExpLo - 0.6, uExpLo + 0.2, fc) * (1.0 - smoothstep(uExpHi - 0.2, uExpHi + 0.6, fc));
+          ex *= smoothstep(uGateU - 0.05, uGateU + 0.35, vUv.x);
+          float burn = smoothstep(0.5, 0.0, abs(vUv.x - uGateU)) * ex;
+          vec3 leader = vec3(0.05, 0.05, 0.055) + fbm(iuv * 6.0 + fid) * 0.03;
+          pic = mix(leader, pic, ex) + burn * vec3(1.0, 0.97, 0.92) * 0.9;
+        }
         // frame line between frames
         float edgeFade = smoothstep(0.0, 0.012, min(min(fx - x0, x1 - fx), min(v - y0, y1 - v)));
         col = mix(col, pic * (0.75 + 0.25 * edgeFade), inImg);
@@ -179,7 +195,7 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
         float spec = pow(max(dot(N, H), 0.0), 60.0);
         float sweep = smoothstep(0.08, 0.0, abs(fract(vUv.x * 0.06 - uTime * 0.05) - 0.5) - 0.42);
         col *= 0.6 + 0.55 * facing;
-        col += rim * vec3(0.78, 0.82, 0.92) * 0.42;
+        col += rim * vec3(0.78, 0.82, 0.92) * uRim;
         col += spec * vec3(1.0) * 0.85 + sweep * vec3(0.9, 0.92, 1.0) * 0.07;
         col *= uBright;
         float fog = smoothstep(uFog.x, uFog.y, vDepth);
@@ -296,16 +312,16 @@ export function dust(count = 500, spread = [16, 10, 14]) {
 
 /* Final pass: chromatic aberration, vignette, gate weave, grain, flicker. */
 export const FinishShader = {
-  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uCA: { value: 0.0022 }, uVig: { value: 1.1 }, uFlicker: { value: 1 }, uFade: { value: 1 } },
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uCA: { value: 0.0022 }, uVig: { value: 1.1 }, uFlicker: { value: 1 }, uFade: { value: 1 }, uWeave: { value: 1 } },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
   fragmentShader: /* glsl */ `
-    uniform sampler2D tDiffuse; uniform float uTime, uCA, uVig, uFlicker, uFade;
+    uniform sampler2D tDiffuse; uniform float uTime, uCA, uVig, uFlicker, uFade, uWeave;
     varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453); }
     void main(){
       vec2 uv = vUv;
       float t = floor(uTime * 24.0);
-      uv += (vec2(h(vec2(t, 1.0)), h(vec2(t, 2.0))) - 0.5) * 0.0007;
+      uv += (vec2(h(vec2(t, 1.0)), h(vec2(t, 2.0))) - 0.5) * 0.0007 * uWeave;
       vec2 c = uv - 0.5;
       float r = dot(c, c);
       vec2 off = c * uCA * (1.0 + r * 4.0);

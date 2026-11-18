@@ -3,6 +3,8 @@ import { motion, useMotionValue, useTransform, animate, AnimatePresence } from '
 import { backdrop, logo, colour, fmtRuntime } from '../lib/films.js'
 import { Img, Mark } from './ui.jsx'
 import { tick } from '../lib/store.js'
+import { play } from '../lib/sound.js'
+import { emit } from './Motes.jsx'
 import './ticket.css'
 
 /* A ticket. Drag the stub past the perforation and it tears: that is how you keep a film for tonight. */
@@ -19,7 +21,10 @@ export default function Ticket({ f, why, slot, index = 0, torn: tornProp = false
 
   const tear = () => {
     if (torn) return
-    tick(14)
+    tick(14); play('tear')
+    // the perforation lets go in a spray of the film's own colour
+    const el = stubRef.current
+    if (el) { const r = el.getBoundingClientRect(); emit({ from: { x: r.left - 4, y: r.top, w: 8, h: r.height }, to: { x: r.left + 40, y: r.top + r.height + 60, w: 160, h: 60 }, n: 40, colour: c, spread: 0.1, dur: [0.5, 0.9], size: 1.2, arc: 0.5 }) }
     setTorn(true)
     animate(x, x.get() + 140, { duration: 0.9, ease: [0.3, 0, 0.7, 1] })
     animate(y, 420, { duration: 0.9, ease: [0.55, 0, 1, 0.45] })

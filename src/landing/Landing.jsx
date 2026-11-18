@@ -2,13 +2,14 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { Arrow } from '../components/Icons.jsx'
 import { motion, useScroll, useTransform, useInView, useSpring, useMotionValueEvent } from 'framer-motion'
 import Lenis from 'lenis'
-import { Mark, Lockup, Rise, Counter, Poster, Img, useRoute, useMagnetic, Clap } from '../components/ui.jsx'
+import { Mark, Lockup, Rise, Counter, Poster, Img, useRoute, useMagnetic, Clap, SoundToggle } from '../components/ui.jsx'
 import Ticket from '../components/Ticket.jsx'
-import { TabIcon } from '../components/Icons.jsx'
+import { TabIcon, LbDots } from '../components/Icons.jsx'
 import Assembly from '../components/Assembly.jsx'
 import { film, films, backdrop, poster, colour, logo, fmtRuntime, ids as byTitles } from '../lib/films.js'
 import { yourColour, ARCHETYPES } from '../lib/taste.js'
 import { setState, getState } from '../lib/store.js'
+import { play } from '../lib/sound.js'
 import { createReel, webglOK } from '../gl/reel.js'
 import './landing.css'
 
@@ -93,7 +94,7 @@ function Nav({ to, start, returning }) {
           <button key={id} className="link-spec" onClick={() => to(id)}>{l}</button>
         ))}
       </nav>
-      <button ref={mag} className="btn nav-cta" onClick={start}>{returning ? 'Open Selects' : 'Try now'}<span className="arr"><Arrow /></span></button>
+      <span className="nav-end"><SoundToggle /><button ref={mag} className="btn nav-cta" onClick={start}>{returning ? 'Open Selects' : 'Try now'}<span className="arr"><Arrow /></span></button></span>
     </header>
   )
 }
@@ -129,13 +130,13 @@ function Hero({ start }) {
       <div className="hero-vignette" />
       <motion.div className="hero-copy" style={{ y: textY, opacity: textO }}>
         <h1 className="verdict hero-h">
-          <Rise text={'The take\nworth keeping.'} delay={0.35} stagger={0.09} />
+          <Rise text={'Your taste,\ndeveloped.'} delay={0.35} stagger={0.09} />
         </h1>
         <motion.div className="hero-cta" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 1, ease: [0.16, 1, 0.3, 1] }}>
-          <p className="lead hero-lead">Three films for tonight, read from your diary.</p>
+          <p className="lead hero-lead">Selects reads your Letterboxd and prints three films for tonight. Each one says why.</p>
           <form className="hero-form" onSubmit={(e) => { e.preventDefault(); start(lb) }}>
             <label className="field hero-field">
-              <span className="pre">letterboxd.com/</span>
+              <span className="pre"><LbDots />letterboxd.com/</span>
               <input id="hero-lb" value={lb} onChange={(e) => setLb(e.target.value)} placeholder="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-label="Letterboxd username" />
             </label>
             <button className="btn lit hero-go" type="submit">Read me <span className="arr"><Arrow /></span></button>
@@ -160,8 +161,8 @@ function Manifesto() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.75', 'end 0.6'] })
   const parts = [
-    'Your', 'diary', 'is', 'the', 'most', 'honest', 'review', 'you', 'have', 'written.', { p: 949 }, { p: 843 },
-    'Selects', 'reads', 'it', { p: 1398 }, 'and', 'hands', 'you', 'three.', { p: 655 },
+    'Every', 'film', 'you', 'log', 'is', 'a', 'frame.', { p: 949 }, { p: 843 },
+    'Selects', 'reads', 'the', 'whole', 'roll', { p: 1398 }, 'and', 'prints', 'three', 'for', 'tonight.', { p: 655 },
   ]
   return (
     <section id="reads" className="manifesto" ref={ref}>
@@ -172,9 +173,9 @@ function Manifesto() {
       </p>
       <div className="m-stats">
         {[
-          [4, 's', 'to read your last fifty'],
-          [3, '', 'films a day'],
-          [1, '', 'always a reach'],
+          [3, '', 'films a night'],
+          [1, '', 'reach on every ticket'],
+          [8, '', 'negatives to find yourself in'],
         ].map(([n, suf, l], i) => (
           <div key={i} className="m-stat">
             <span className="numeral"><Counter to={n} duration={1.6 + i * 0.2} />{suf}</span>
@@ -235,17 +236,19 @@ function TicketSection() {
   )
 }
 
-/* ── THE STRIP: a year in bars; the dock opens under your hand ─ */
+/* ── THE STRIP: a century of cinema in bars; a loupe rides your hand ─ */
 function StripSection() {
   const list = useMemo(() => films().slice().sort((a, b) => (a.y || 0) - (b.y || 0)), [])
   const [active, setActive] = useState(-1)
   const row = useRef(null)
+  const loupe = useRef(null)
   const bars = useRef([])
   const raf = useRef(0)
+  const lastI = useRef(-1)
   const N = list.length
   const onMove = (clientX) => {
     const r = row.current.getBoundingClientRect()
-    const p = (clientX - r.left) / r.width
+    const p = Math.max(0, Math.min(0.9999, (clientX - r.left) / r.width))
     cancelAnimationFrame(raf.current)
     raf.current = requestAnimationFrame(() => {
       const c = p * N
@@ -256,34 +259,42 @@ function StripSection() {
         b.style.flexGrow = 1 + k * k * 10
         b.style.transform = `skewX(-13.5deg) scaleY(${0.62 + k * 0.38})`
       })
-      setActive(Math.max(0, Math.min(N - 1, Math.floor(c))))
+      const i = Math.floor(c)
+      if (i !== lastI.current) { lastI.current = i; play('hover', { gap: 0.03 }) }
+      setActive(i)
+      // the loupe follows the hand, held inside the stage
+      if (loupe.current) {
+        const w = loupe.current.offsetWidth
+        const x = Math.max(0, Math.min(r.width - w, clientX - r.left - w / 2))
+        loupe.current.style.transform = `translate3d(${x}px,0,0)`
+      }
     })
   }
   const leave = () => {
     bars.current.forEach((b) => b && ((b.style.flexGrow = 1), (b.style.transform = 'skewX(-13.5deg) scaleY(.62)')))
-    setActive(-1)
+    setActive(-1); lastI.current = -1
   }
   const f = active >= 0 ? list[active] : null
+  const decade = f ? `${Math.floor((f.y || 2000) / 10) * 10}s` : ''
   return (
     <section className="s-sec">
       <div className="s-head">
-        <div>
-          <Rise as="h2" className="verdict sec-h" text={'Everything you have\nlogged, as one strip.'} />
-        </div>
+        <Rise as="h2" className="verdict sec-h" text={'A century of cinema.\nOne strip.'} />
       </div>
       <div className="s-stage">
-        <div className="s-readout">
-          {f ? (
-            <motion.div key={f.id} className="s-card" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-              <img src={poster(f.id)} alt="" />
-              <div>
-                <div className="title s-title">{f.t}</div>
-                <div className="spec">{f.y} · {f.dir[0]} · <span style={{ color: colour(f) }}>{colour(f).toUpperCase()}</span></div>
-              </div>
-            </motion.div>
-          ) : (
-            <span className="spec">Each bar, a film in its own colour</span>
-          )}
+        <div className="s-loupe-rail">
+          <div ref={loupe} className={`s-loupe ${f ? 'on' : ''}`} style={{ '--film': f ? colour(f) : 'transparent' }} aria-hidden={!f}>
+            <div className="s-lp-img">
+              {f && <Img key={f.id} src={backdrop(f.id)} alt="" eager />}
+              <span className="s-lp-decade numeral">{decade}</span>
+            </div>
+            <div className="s-lp-body">
+              <b className="s-lp-t">{f ? f.t : ''}</b>
+              <span className="spec">{f ? `${f.y} · ${f.dir[0] || ''}` : ''}</span>
+              <span className="s-lp-hex"><i />{f ? colour(f) : ''}</span>
+            </div>
+          </div>
+          {!f && <span className="spec s-idle">Run your hand along it</span>}
         </div>
         <div
           className="s-row"
@@ -336,6 +347,7 @@ function Negatives({ start }) {
   const track = useRef(null)
   const { scrollYProgress } = useScroll({ target: sec, offset: ['start start', 'end end'] })
   const [w, setW] = useState(0)
+  const [hov, setHov] = useState(null)
   useEffect(() => {
     const m = () => setW(track.current ? Math.max(0, track.current.scrollWidth - innerWidth + 64) : 0)
     m(); addEventListener('resize', m)
@@ -344,30 +356,35 @@ function Negatives({ start }) {
   const x = useTransform(scrollYProgress, [0.05, 0.95], [0, -w])
   const xs = useSpring(x, { stiffness: 120, damping: 30, mass: 0.4 })
   const entries = Object.entries(ARCHETYPES)
+  const touch = typeof matchMedia !== 'undefined' && matchMedia('(hover: none)').matches
   return (
     <section id="negative" className="n-sec" ref={sec} style={{ '--len': entries.length }}>
       <div className="n-sticky">
         <div className="n-head">
-          <div>
-            <Rise as="h2" className="verdict sec-h" text={'Every print comes\nfrom a negative.'} />
-          </div>
-          <p className="lead">Eight tastes. Find yours.</p>
+          <Rise as="h2" className="verdict sec-h" text={'Eight ways\nto watch a film.'} />
+          <p className="lead">Your read develops into one of them. Which is yours?</p>
         </div>
         <motion.div className="n-track" ref={track} style={{ x: xs }}>
           {entries.map(([name, a], i) => {
             const ids = byTitles(...(ARCH_TITLES[name] || []))
-            const c = a.hue
+            const on = hov === name
             return (
-              <article key={name} className="n-card" style={{ '--c': c }} onClick={start} data-cursor="FIND YOURS">
+              <article key={name} className={`n-card ${on ? 'on' : ''}`} style={{ '--c': a.hue }} onClick={start} onPointerEnter={() => setHov(name)} onPointerLeave={() => setHov(null)} data-cursor="FIND YOURS">
                 <div className="n-field">
+                  <span className="n-no numeral">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="n-sigil"><Mark size={64} five layout={on || touch ? a.sigil : 'mark'} lit={2} ink="rgba(239,237,233,.92)" litColour="var(--select)" /></div>
                   <div className="n-posters">
                     {ids.map((id, k) => <img key={id} src={poster(id)} alt="" style={{ '--k': k }} />)}
                   </div>
-                  <Mark size={40} className="n-mark" />
                 </div>
                 <div className="n-body">
                   <h3 className="n-name">{name}</h3>
                   <p>{a.line}</p>
+                  <dl className="n-spec">
+                    <div><dt className="spec">Lights down</dt><dd>{a.hour}</dd></div>
+                    <div><dt className="spec">Seat</dt><dd>{a.seat}</dd></div>
+                    <div><dt className="spec">Ritual</dt><dd>{a.ritual}</dd></div>
+                  </dl>
                 </div>
               </article>
             )
@@ -478,7 +495,7 @@ function Final({ start }) {
       <Rise as="h2" className="verdict f-h" text={'Bring your diary.'} />
       <form className="f-form" onSubmit={(e) => { e.preventDefault(); start(lb) }}>
         <label className="field">
-          <span className="pre">letterboxd.com/</span>
+          <span className="pre"><LbDots />letterboxd.com/</span>
           <input id="final-lb" value={lb} onChange={(e) => setLb(e.target.value)} placeholder="username" autoCapitalize="none" spellCheck={false} aria-label="Letterboxd username" />
         </label>
         <button className="btn lit" type="submit">Read me <span className="arr"><Arrow /></span></button>

@@ -30,6 +30,28 @@ export async function createDevelop(canvas, { posters, stills, duration = 7.2, o
   const n = imgs.length
   const CW = 1.5, CH = 2.25
 
+  // ── the film: already threaded, running up through the gate, unexposed
+  const curve = new THREE.CatmullRomCurve3([[2.6, -10, -1.6], [0.9, -4.2, -1.4], [-0.3, -0.6, -1.2], [0.5, 2.6, -1.8], [-1.4, 6.5, -3.6], [-4, 10, -7]].map((p) => new THREE.Vector3(...p)))
+  const FRAME = 1.18
+  const len = curve.getLength()
+  const smat = stripMaterial({ atlas, edge, frameLen: FRAME })
+  smat.uniforms.uFog.value.set(7, 22)
+  smat.uniforms.uFocusR.value = 0.001
+  smat.uniforms.uExpOn.value = 1
+  smat.uniforms.uBright.value = 0
+  smat.uniforms.uRim.value = 0.16
+  const strip = new THREE.Mesh(ribbon(curve, { segments: mobile ? 360 : 520, width: 1.05, frameLen: FRAME, twist: (t) => Math.sin(t * 4.0 + 0.6) * 0.45 + t * 1.1 }), smat)
+  scene.add(strip)
+  // find where the film crosses the gate line, low in frame
+  const gateY = mobile ? -3.4 : -2.35
+  let gt = 0
+  for (let i = 0, best = 1e9; i <= 400; i++) { const p = curve.getPointAt(i / 400); const d = Math.abs(p.y - gateY); if (d < best && p.y < 0) { best = d; gt = i / 400 } }
+  const gP = curve.getPointAt(gt), gT = curve.getTangentAt(gt).normalize()
+  const gB = new THREE.Vector3().crossVectors(gT, new THREE.Vector3(0, 0, 1)).normalize()
+  gB.applyAxisAngle(gT, Math.sin(gt * 4.0 + 0.6) * 0.45 + gt * 1.1)
+  const gateU = { P: { value: gP }, B: { value: gB }, T: { value: gT } }
+  smat.uniforms.uGateU.value = (gt * len) / FRAME
+
   // ── the deck: posters as cards, fanned
   const deck = new THREE.Group()
   scene.add(deck)
@@ -95,31 +117,34 @@ export async function createDevelop(canvas, { posters, stills, duration = 7.2, o
     geo.setAttribute('aV', new THREE.BufferAttribute(vy, 1))
     const pm = new THREE.ShaderMaterial({
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      uniforms: { uFront: { value: 1.2 }, uTime: { value: 0 }, uCard: { value: new THREE.Matrix4() }, uGate: { value: new THREE.Vector3(0, -3.1, 0.6) }, uPx: { value: Math.min(devicePixelRatio, 2) }, uSize: { value: mobile ? 3.4 : 2.6 } },
+      uniforms: { uFront: { value: 1.2 }, uTime: { value: 0 }, uCard: { value: new THREE.Matrix4() }, uGate: gateU.P, uAcross: gateU.B, uAlong: gateU.T, uPx: { value: Math.min(devicePixelRatio, 2) }, uSize: { value: mobile ? 3.4 : 2.6 } },
       vertexShader: /* glsl */ `
         attribute vec3 aColor; attribute vec2 aRand; attribute float aV;
-        uniform float uFront, uTime, uPx, uSize; uniform mat4 uCard; uniform vec3 uGate;
+        uniform float uFront, uTime, uPx, uSize; uniform mat4 uCard; uniform vec3 uGate, uAcross, uAlong;
         varying vec3 vC; varying float vA;
         vec3 spectrum(float t){ return clamp(abs(mod(t*6.0 + vec3(0.0,4.0,2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0); }
         void main(){
-          // released once the front passes this row
-          float rel = clamp((uFront - aV - aRand.x * 0.05) * 1.6, 0.0, 1.0);
-          float t = rel;
+          // released once the dissolve front passes this row; 0→1 is the fall, 1→1.5 is the ride up the strip
+          float rel = clamp((uFront - aV - aRand.x * 0.05) * 1.6, 0.0, 1.5);
+          float t = min(rel, 1.0);
           vec3 p0 = (uCard * vec4(position, 1.0)).xyz;
           float lane = (aRand.y - 0.5);
-          vec3 g = uGate + vec3(lane * 2.6, 0.0, (aRand.x - 0.5) * 0.4);
-          // a falling ribbon: drift out, twist, then pour into the gate
-          vec3 c1 = p0 + vec3(lane * 0.8 + sin(aRand.x * 30.0) * 0.4, 0.5 + aRand.x * 0.6, 1.2 + aRand.y * 0.8);
-          vec3 c2 = vec3(lane * 0.9 + sin(aV * 12.0 + uTime) * 0.25, -1.4, 0.8);
+          // every particle lands on the strip itself, across its width, inside the gate
+          vec3 g = uGate + uAcross * lane * 0.92;
+          vec3 c1 = p0 + vec3(lane * 0.8 + sin(aRand.x * 30.0) * 0.4, 0.4 + aRand.x * 0.5, 1.0 + aRand.y * 0.8);
+          vec3 c2 = mix(p0, g, 0.6) + vec3(lane * 1.6 + sin(aV * 12.0 + uTime) * 0.2, 0.0, 1.2);
           float e = t * t * (3.0 - 2.0 * t);
           vec3 p = mix(mix(mix(p0, c1, e), mix(c1, c2, e), e), mix(mix(c1, c2, e), g, e), e);
-          p.x += sin(uTime * 3.0 + aRand.x * 40.0) * 0.04 * t;
+          p.x += sin(uTime * 3.0 + aRand.x * 40.0) * 0.04 * t * (1.0 - t);
+          // after the gate: carried up with the film, pressed flat into the emulsion
+          float ride = max(0.0, rel - 1.0) * 2.0;
+          p += uAlong * ride * (0.12 + aRand.x * 0.22);
           vec4 mv = modelViewMatrix * vec4(p, 1.0);
-          gl_PointSize = uSize * uPx * (1.0 - t * 0.55) * (9.0 / -mv.z) * (rel > 0.0 ? 1.0 : 0.0);
+          gl_PointSize = uSize * uPx * (1.0 - t * 0.5) * (1.0 - ride * 0.6) * (9.0 / -mv.z) * (rel > 0.0 ? 1.0 : 0.0);
           vec3 spec = spectrum(aRand.x + aV * 0.6 + uTime * 0.2);
           vC = mix(aColor, spec * 1.2, smoothstep(0.1, 0.6, t));
-          vC = mix(vC, vec3(1.0, 0.85, 0.65), smoothstep(0.8, 1.0, t));
-          vA = rel > 0.0 ? (1.0 - smoothstep(0.92, 1.0, t)) * 0.9 : 0.0;
+          vC = mix(vC, vec3(1.0, 0.95, 0.86), smoothstep(0.85, 1.0, t));
+          vA = rel > 0.0 ? (1.0 - smoothstep(0.2, 1.0, ride)) * 0.9 : 0.0;
           gl_Position = projectionMatrix * mv;
         }`,
       fragmentShader: /* glsl */ `
@@ -132,36 +157,28 @@ export async function createDevelop(canvas, { posters, stills, duration = 7.2, o
     particleSets.push({ pts, card })
   })
 
-  // ── the gate: where the light lands
+  // ── the gate: a slit of light laid across the strip, where the posters land
   const gate = new THREE.Mesh(
-    new THREE.PlaneGeometry(6, 1.4),
+    new THREE.PlaneGeometry(3.2, 1.0),
     new THREE.ShaderMaterial({
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
       uniforms: { uI: { value: 0 }, uTime: { value: 0 } },
       vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
       fragmentShader: /* glsl */ `
         uniform float uI, uTime; varying vec2 vUv;
         void main(){
-          vec2 p = (vUv - 0.5) * vec2(6.0, 1.4);
-          float core = exp(-pow(p.y * 9.0, 2.0)) * smoothstep(2.4, 0.0, abs(p.x));
-          float halo = exp(-dot(p, p) * 0.9);
-          float rays = pow(max(0.0, 1.0 - abs(p.y) * 1.2), 3.0) * (0.6 + 0.4 * sin(p.x * 30.0 + uTime * 4.0));
-          vec3 c = vec3(1.0, 0.99, 0.97) * core * 1.6 + vec3(0.8, 0.85, 1.0) * halo * 0.3 + vec3(0.9, 0.9, 1.0) * rays * 0.05;
+          vec2 p = (vUv - 0.5) * vec2(3.2, 1.0);
+          float core = exp(-pow(p.y * 34.0, 2.0)) * smoothstep(0.75, 0.5, abs(p.x));
+          float halo = exp(-dot(p * vec2(1.2, 3.0), p * vec2(1.2, 3.0)) * 1.4);
+          float jaws = smoothstep(0.02, 0.0, abs(abs(p.x) - 0.62)) * smoothstep(0.32, 0.0, abs(p.y));
+          vec3 c = vec3(1.0, 0.98, 0.95) * core * 1.3 + vec3(0.8, 0.85, 1.0) * halo * 0.12 + vec3(1.0) * jaws * 0.25;
           gl_FragColor = vec4(c * uI, 1.0);
         }`,
     }),
   )
-  gate.position.set(0, -3.1, 0.6)
+  gate.position.copy(gateU.P.value).add(new THREE.Vector3(0, 0, 0.08))
+  gate.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), gateU.B.value.clone().normalize())
   scene.add(gate)
-
-  // ── the negative rises
-  const curve = new THREE.CatmullRomCurve3([[3.5, -9, -2], [1.2, -4.5, 0.2], [-0.6, -1, 0.6], [0.4, 2.4, -0.2], [-1.6, 6.5, -2.5], [-4, 10, -6]].map((p) => new THREE.Vector3(...p)))
-  const smat = stripMaterial({ atlas, edge })
-  smat.uniforms.uFog.value.set(6, 20)
-  smat.uniforms.uFocusR.value = 0.001
-  const strip = new THREE.Mesh(ribbon(curve, { segments: mobile ? 360 : 520, width: 1.05, twist: (t) => Math.sin(t * 5.0) * 0.7 + t * 1.5 }), smat)
-  strip.position.y = -14
-  scene.add(strip)
 
   const motes = dust(mobile ? 140 : 320, [12, 12, 10])
   motes.material.uniforms.uAlpha.value = 0.32
@@ -188,10 +205,15 @@ export async function createDevelop(canvas, { posters, stills, duration = 7.2, o
   resize()
   const ro = new ResizeObserver(resize); ro.observe(canvas)
 
-  const T = { deck: 1.5, dissolve: 2.7, rise: 2.9 }
-  const total = Math.max(duration, T.deck + T.dissolve + T.rise)
+  const T = { deck: 1.4, dissolve: 2.8 }
+  const expStart = T.deck + 0.2 * T.dissolve
+  const expEnd = T.deck + 1.3 * T.dissolve + 0.35
+  const total = Math.max(duration, expEnd + 2.3)
   let t = 0, last = performance.now(), raf, done = false
+  let expHi = null, expLo = -1e4
+  smat.uniforms.uExpLo.value = -1e4; smat.uniforms.uExpHi.value = -1e4
   const ease = (x) => 1 - Math.pow(1 - Math.max(0, Math.min(1, x)), 3)
+  const smooth = (x) => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x) }
 
   function loop() {
     const now = performance.now()
@@ -199,45 +221,52 @@ export async function createDevelop(canvas, { posters, stills, duration = 7.2, o
     last = now
     t += dt
     const time = t
-    // A — the deck floats in
+    // A — the deck floats in, in front of a film already running
     const a = ease(t / 1.1)
-    deck.position.y = (1 - a) * -0.8 + Math.sin(time * 1.4) * 0.05 + 0.5
+    deck.position.y = (1 - a) * -0.8 + Math.sin(time * 1.4) * 0.05 + 0.7
     deck.rotation.y = Math.sin(time * 0.7) * 0.22
     deck.rotation.x = -0.1 + Math.sin(time * 0.5) * 0.05
     cards.forEach((c, i) => {
       const spread = 1 + Math.sin(time * 1.2 + i) * 0.04
       c.position.x = c.userData.home.x * spread * a
       c.rotation.z = c.userData.rz * a
-      c.material.opacity = a
     })
-    // B — dissolve, top down, card after card
+    smat.uniforms.uBright.value = 0.3 + 0.55 * ease((t - 0.3) / 1.4)
+    // B — each poster comes apart top-down; every pixel falls into the gate and onto the film
     const b = (t - T.deck) / T.dissolve
     deck.updateMatrixWorld(true)
     particleSets.forEach(({ pts, card }, i) => {
-      const f = Math.max(-0.2, Math.min(1.3, (b - i * 0.09) * 1.45))
-      const front = b <= 0 ? 0 : f
-      card.material.uniforms.uFront.value = b <= 0 ? -0.2 : front
-      pts.material.uniforms.uFront.value = b <= 0 ? -0.5 : front
+      const f = Math.max(-0.2, Math.min(2.4, (b - i * 0.08) * 2.4))
+      card.material.uniforms.uFront.value = b <= 0 ? -0.2 : f
+      pts.material.uniforms.uFront.value = b <= 0 ? -0.5 : f
       pts.material.uniforms.uTime.value = time
       pts.material.uniforms.uCard.value.copy(card.matrixWorld)
     })
-    const gi = Math.max(0, Math.min(1, b * 1.6)) * (1 - ease((t - T.deck - T.dissolve - 0.6) / 1.2))
-    gate.material.uniforms.uI.value = gi * (0.9 + Math.sin(time * 30) * 0.05)
+    // C — exposure: the film runs faster while light is landing on it
+    const exposing = t >= expStart && t <= expEnd
+    const speed = t < expStart ? 0.25 + 0.6 * smooth((t - expStart + 0.6) / 0.6) : exposing ? 0.85 : 0.85 - 0.45 * smooth((t - expEnd) / 1.2)
+    smat.uniforms.uOffset.value -= dt * speed
+    if (t >= expStart && expHi === null) expHi = smat.uniforms.uGateU.value + smat.uniforms.uOffset.value + 0.5
+    if (expHi !== null) {
+      if (t <= expEnd) expLo = smat.uniforms.uGateU.value + smat.uniforms.uOffset.value
+      smat.uniforms.uExpHi.value = expHi
+      smat.uniforms.uExpLo.value = expLo
+    }
+    const gi = smooth((t - expStart + 0.5) / 0.6) * (1 - smooth((t - expEnd) / 0.8))
+    gate.material.uniforms.uI.value = gi * (0.94 + Math.sin(time * 9) * 0.03)
     gate.material.uniforms.uTime.value = time
-    // C — the negative rises out of the gate and develops
-    const c = (t - T.deck - T.dissolve + 0.4) / T.rise
-    strip.position.y = -14 + ease(c) * 14
-    strip.rotation.y = (1 - ease(c)) * 0.6
-    smat.uniforms.uOffset.value += dt * (0.5 + (1 - ease(c)) * 1.5)
+    // D — the exposed run develops: negative to print, with the films' own colour coming through
     smat.uniforms.uTime.value = time
-    smat.uniforms.uDevelopAll.value = ease((c - 0.45) / 0.55)
-    camera.position.y = 0.2 + ease(c) * 0.4
-    camera.lookAt(0, ease(c) * 0.6, 0)
+    smat.uniforms.uDevelopAll.value = ease((t - expEnd - 0.3) / 1.6)
+    const c = smooth((t - expEnd + 0.4) / 2.2)
+    camera.position.y = 0.2 + c * 0.5
+    camera.position.x = Math.sin(time * 0.3) * 0.15
+    camera.lookAt(0, -0.2 + c * 0.9, -0.8)
     motes.material.uniforms.uTime.value = time
     finish.uniforms.uTime.value = time
-    finish.uniforms.uFade.value = Math.min(1, t * 2) * (1 - ease((t - total + 0.5) / 0.5) * 0.0)
+    finish.uniforms.uFade.value = Math.min(1, t * 2)
     composer.render()
-    onProgress && onProgress(Math.min(1, t / total))
+    onProgress && onProgress(Math.min(1, t / total), { exposing, developed: smat.uniforms.uDevelopAll.value })
     if (t >= total && !done) { done = true; onDone && onDone() }
     raf = requestAnimationFrame(loop)
   }

@@ -81,6 +81,7 @@ a { color: inherit; text-decoration: none; }
 .spec.lit { color: var(--select); }
 .numeral {
   font-family: var(--mono);
+  text-transform: uppercase;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
@@ -90,7 +91,7 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.02em;
-  text-transform: lowercase;
+  text-transform: uppercase;
   padding: 5px 8px;
   border: 1px solid var(--line-2);
   color: var(--fg-2);
@@ -240,3 +241,48 @@ a { color: inherit; text-decoration: none; }
 .at-who { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
 .at-who .spec { margin-bottom: 2px; }
 .at-person { font-size: 13px; line-height: 1.3; color: var(--select); }
+
+/* ── type rule: Martian Mono is always set in capitals ───── */
+.spec, .chip, .numeral, .link-spec, code, kbd { text-transform: uppercase; }
+
+/* ── sound toggle: a five-bar meter ─────────────────────── */
+.sound-t { display: inline-flex; align-items: flex-end; gap: 2px; height: 44px; width: 32px; justify-content: center; padding-bottom: 15px; color: var(--fg-3); transition: color .25s; }
+.sound-t:hover { color: var(--fg); }
+.sound-t i { width: 2px; height: 3px; background: currentColor; transform: skewX(var(--skew)); transition: height .3s var(--ease); }
+.sound-t.on { color: var(--fg-2); }
+.sound-t.on i { animation: meter 0.9s var(--d) infinite alternate cubic-bezier(.45,0,.55,1); }
+.sound-t.on i:nth-child(3) { background: var(--select); }
+@keyframes meter { 0% { height: 3px; } 100% { height: 13px; } }
+@media (prefers-reduced-motion: reduce) { .sound-t.on i { animation: none; height: 9px; } }
+
+/* ── motes: the light that carries things between places ─ */
+.motes { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 85; pointer-events: none; }
+
+/* ── insight frames (reveal + You) ───────────────────────── */
+.ins-card { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 20px 22px 22px; background: var(--base-2); box-shadow: inset 0 0 0 1px var(--line); min-height: 150px; }
+.ins-card::before { content: ''; position: absolute; left: 0; top: 0; height: 2px; width: 28px; background: var(--you, var(--fg-3)); }
+.ins-card.sharp::before { background: var(--select); }
+@media (max-width: 760px) { .ins-card { min-height: 0; } }
+.ins-card.sharp { box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--select) 70%, var(--line)); }
+.ins-big { font-variation-settings: 'wdth' 100; font-weight: 750; font-size: clamp(24px, 2.4vw, 34px); line-height: 1.02; letter-spacing: -0.03em; }
+.ins-card p { margin: auto 0 0; color: var(--fg-2); font-size: 14px; line-height: 1.45; }
+
+/* ── letterboxd field: three dots that part when you focus ── */
+.lb-dots { flex: none; overflow: visible; margin-right: 10px; }
+.lb-dots circle { mix-blend-mode: screen; transition: transform .5s var(--ease-back); }
+.field:focus-within .lb-dots .d0 { transform: translateX(-2.5px); }
+.field:focus-within .lb-dots .d2 { transform: translateX(2.5px); }
+.lb-dots.busy circle { animation: lb-hop .9s var(--ease-io) infinite; }
+.lb-dots.busy .d1 { animation-delay: .12s; }
+.lb-dots.busy .d2 { animation-delay: .24s; }
+@keyframes lb-hop { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-3px); } }
+.field .pre { display: inline-flex; align-items: center; }
+
+/* ── loading ─────────────────────────────────────────────── */
+.boot { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: var(--base); }
+.boot .spec { animation: er-blink 1.6s var(--ease-io) infinite; }
+@keyframes er-blink { 50% { opacity: .25; } }
+/* a poster still on its way: a light sweep across an empty frame */
+.poster::before { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(239,237,233,.06) 50%, transparent 70%) var(--base-3); background-size: 250% 100%; animation: shimmer 1.4s linear infinite; }
+.poster:has(img:not(.loading))::before { display: none; }
+@keyframes shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
