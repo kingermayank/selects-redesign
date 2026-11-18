@@ -19,7 +19,7 @@
   /* a short flare: from the lens to just before the icon, opening wide */
   content: ''; position: absolute; left: 3px; top: 50%; width: 30px; height: 64px; translate: 0 -50%; pointer-events: none;
   clip-path: polygon(0 33%, 100% 0, 100% 100%, 0 67%);
-  background: linear-gradient(90deg, rgba(255,59,20,.056), rgba(255,59,20,.022) 55%, rgba(255,59,20,0));
+  background: linear-gradient(90deg, rgba(255,59,20,.064), rgba(255,59,20,.025) 55%, rgba(255,59,20,0));
   opacity: .85; transition: opacity .35s var(--ease); animation: lamp 3.6s var(--ease-io) infinite;
 }
 .rail-item.on:hover .rail-lit::after { opacity: 1; }
@@ -53,7 +53,7 @@
   .tab-lit::after {
     content: ''; position: absolute; left: -75%; right: -75%; top: 2px; height: 62px; pointer-events: none;
     clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
-    background: linear-gradient(180deg, rgba(255,59,20,.05), rgba(255,59,20,.017) 45%, rgba(255,59,20,0));
+    background: linear-gradient(180deg, rgba(255,59,20,.058), rgba(255,59,20,.02) 45%, rgba(255,59,20,0));
     animation: lamp 3.6s var(--ease-io) infinite;
   }
   .sample { flex-direction: column; align-items: flex-start; gap: 0; }

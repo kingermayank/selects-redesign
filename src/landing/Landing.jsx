@@ -149,7 +149,6 @@ function Hero({ start }) {
             </label>
             <button className="btn lit hero-go" type="submit">Read me <span className="arr"><Arrow /></span></button>
           </form>
-          <button type="button" className="text-link" onClick={() => start('')}>Start without Letterboxd <Arrow /></button>
         </motion.div>
       </motion.div>
     </section>
@@ -514,7 +513,6 @@ function Final({ start }) {
         </label>
         <button className="btn lit" type="submit">Read me <span className="arr"><Arrow /></span></button>
       </form>
-      <button className="text-link" onClick={() => start('')}>Start without Letterboxd <Arrow /></button>
     </section>
   )
 }

@@ -7,6 +7,16 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import { loadAtlas, edgeTexture, stripMaterial, ribbon, dust, FinishShader } from './strip.js'
 
 /* The landing hero: a reel unspooling through a projector beam. */
+
+// A strip must never show an end: carry each curve far past every edge of any screen.
+function endless(points, k = 30) {
+  // extend sideways rather than into the distance, so the strip leaves through a screen edge
+  // instead of shrinking to a point in the middle
+  const v = points.map((p) => new THREE.Vector3(...p))
+  const out = (from, to) => { const d = from.clone().sub(to); d.z *= 0.15; return from.clone().add(d.normalize().multiplyScalar(k)) }
+  const n = v.length - 1
+  return [out(v[0], v[1]), ...v, out(v[n], v[n - 1])]
+}
 export async function createReel(canvas, { images, portrait = false, onReady } = {}) {
   const mobile = matchMedia('(pointer: coarse)').matches || innerWidth < 760
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -29,22 +39,24 @@ export async function createReel(canvas, { images, portrait = false, onReady } =
   const pts = portrait
     ? [[4.6, -9, -10], [3.0, -4.5, -4], [1.5, -1.4, -0.5], [0.9, 1.2, 0.8], [1.9, 4.2, 0.2], [3.6, 8, -2.5]]
     : [[11, -5.5, -16], [6.5, -2.8, -7], [2.6, -0.7, -1.6], [-0.4, 0.5, 0.6], [-3.4, 1.4, 1.2], [-7.5, 3.6, -0.4], [-13, 6.5, -5]]
-  const curve = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(...p)), false, 'catmullrom', 0.5)
+  const curve = new THREE.CatmullRomCurve3(endless(pts), false, 'catmullrom', 0.5)
   const mat = stripMaterial({ atlas, edge })
-  const strip = new THREE.Mesh(ribbon(curve, { segments: mobile ? 420 : 700, width: 1.0, twist: (t) => Math.sin(t * Math.PI * 1.6 + 0.4) * 0.85 + t * 0.6 }), mat)
+  const strip = new THREE.Mesh(ribbon(curve, { segments: mobile ? 700 : 1200, width: 1.0, twist: (t) => Math.sin(t * Math.PI * 1.6 + 0.4) * 0.85 + t * 0.6 }), mat)
   scene.add(strip)
 
   // ── a second strip behind, out of focus, running the other way
-  const curve2 = new THREE.CatmullRomCurve3(
-    (portrait
+  const curve2 = new THREE.CatmullRomCurve3(endless(
+    portrait
       ? [[-6, 9, -14], [-3, 3, -11], [-4.5, -2, -9], [-1, -8, -12]]
-      : [[-14, -6, -18], [-6, -3.5, -13], [1, -4.6, -11], [8, -1.5, -13], [15, 2, -17]]
-    ).map((p) => new THREE.Vector3(...p)),
-  )
+      : [[-14, -6, -18], [-6, -3.5, -13], [1, -4.6, -11], [8, -1.5, -13], [15, 2, -17]],
+    40,
+  ))
   const mat2 = stripMaterial({ atlas, edge })
-  mat2.uniforms.uBright.value = 0.55
-  mat2.uniforms.uFog.value.set(8, 26)
-  const strip2 = new THREE.Mesh(ribbon(curve2, { segments: 300, width: 1.0, twist: (t) => t * 2.2 }), mat2)
+  // half-developed, so its frames read as frames and its run is visible
+  mat2.uniforms.uBright.value = 0.72
+  mat2.uniforms.uDevelopAll.value = 0.4
+  mat2.uniforms.uFog.value.set(10, 34)
+  const strip2 = new THREE.Mesh(ribbon(curve2, { segments: 700, width: 1.0, twist: (t) => t * 2.2 }), mat2)
   scene.add(strip2)
 
   // ── beam: the projector, from up and behind
@@ -143,7 +155,7 @@ export async function createReel(canvas, { images, portrait = false, onReady } =
     pointer.lerp(target, 0.06)
     const sp = reduce ? 0.02 : speed + boost * 0.9 + scroll * 1.2
     mat.uniforms.uOffset.value += dt * sp
-    mat2.uniforms.uOffset.value -= dt * sp * 0.6
+    mat2.uniforms.uOffset.value -= dt * (reduce ? 0.02 : 0.3 + scroll * 0.8)
     ;[mat, mat2].forEach((m) => (m.uniforms.uTime.value = t))
     motes.material.uniforms.uTime.value = t
     beam.material.uniforms.uTime.value = t
