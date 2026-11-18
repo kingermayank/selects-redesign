@@ -35,8 +35,11 @@
 .ob-cta > * { pointer-events: auto; }
 .ob-cta .btn { max-width: 440px; }
 @media (min-width: 981px) {
-  .ob-cta { left: auto; right: var(--gutter); bottom: 28px; width: 380px; background: none; padding: 0; align-items: stretch; }
-  .ob-cta .link-spec { align-self: center; }
+  /* the answer button lives under the question, so it never sits on top of the work */
+  .ob-cta { left: var(--gutter); right: auto; bottom: 32px; width: min(380px, calc((100vw - 2 * var(--gutter)) * 5 / 12 - 40px)); background: none; padding: 0; align-items: stretch; }
+  .ob-cta .link-spec { align-self: flex-start; }
+  /* single-answer steps: the question sits level with the thing you answer it with */
+  .ob-split:not(.wall-split) > .q { align-self: center; position: relative; top: 0; padding-top: 0; margin-top: -40px; }
 }
 
 /* ── splash ────────────────────────────────────────────────── */
@@ -88,6 +91,7 @@
 
 /* the tray: picks drop into a strip of film */
 .tray { margin-top: 26px; }
+.tray-count { margin: 10px 0 0; }
 .tray-strip {
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 14px 8px;
   background:

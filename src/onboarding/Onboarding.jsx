@@ -169,12 +169,13 @@ function Positive({ s, next }) {
     <div className="ob-split wall-split">
       <Q layout="wide" title="If you could rent a theatre and watch one film in it forever, what is it?">
         <Tray ids={picks} onRemove={toggle} />
+        <p className="spec tray-count">{picks.length ? `${picks.length} of 5 in the reel` : 'Pick one to start the reel'}</p>
       </Q>
       <div className="ob-right">
         <Search value={q} onChange={setQ} placeholder="search any film, director, actor" />
         <Wall list={list} picked={picks} onPick={toggle} kind="positive" label={q ? `Results for “${q}”` : picks.length ? 'Re-sorted around your pick' : 'Trending this week and always'} />
       </div>
-      <CTA label={picks.length ? `Next · ${picks.length} kept` : 'Pick at least one'} onClick={next} disabled={!picks.length} />
+      <CTA label="Continue" onClick={next} disabled={!picks.length} />
     </div>
   )
 }
@@ -201,7 +202,7 @@ function Negative({ s, next }) {
         <Search value={q} onChange={setQ} placeholder="search the ones you resisted" />
         <Wall list={list} picked={s.negative} onPick={toggle} kind="negative" label={q ? `Results for “${q}”` : 'Everyone loved these'} />
       </div>
-      <CTA label={s.negative.length ? `Next · ${s.negative.length} struck` : 'Next · or skip'} onClick={next} />
+      <CTA label="Continue" onClick={next} />
     </div>
   )
 }
