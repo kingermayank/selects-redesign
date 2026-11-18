@@ -127,7 +127,9 @@ export default function Hunt() {
                 </AnimatePresence>
               </div>
             ) : (
-              <EmptyReel title="Nothing in frame." sub="Widen the frame, or drag it toward the brighter stars." action="Reset frame" onAction={reset} />
+              q.trim() && !pool.length
+              ? <EmptyReel title="No film by that name." sub="Check the spelling, or try a director, an actor or a year." action="Clear search" onAction={() => { setQ(''); play('detent') }} />
+              : <EmptyReel title="Nothing in frame." sub="Widen the frame, or drag it toward the brighter stars." action="Reset frame" onAction={reset} />
             )}
           </div>
         </div>

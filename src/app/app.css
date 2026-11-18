@@ -112,7 +112,7 @@
 .hunt-search { height: 52px; gap: 12px; color: var(--fg-3); }
 .hunt-search input { font-family: var(--display); font-size: 17px; }
 .vibes { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0; -webkit-mask: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask: linear-gradient(90deg, #000 calc(100% - 40px), transparent); padding-right: 40px; }
-.vibe { min-height: 36px; padding: 0 12px; display: inline-flex; align-items: center; transition: background .25s, color .25s, border-color .25s; }
+.vibe { height: 52px; padding: 0 18px; display: inline-flex; align-items: center; flex: none; transition: background .25s, color .25s, border-color .25s; }
 .vibe:hover { color: var(--fg); border-color: var(--fg-3); }
 .vibe.on { background: var(--fg); color: var(--base); border-color: var(--fg); }
 .deck { margin: 20px var(--gutter) 0; box-shadow: inset 0 0 0 1px var(--line-2); background: var(--base-2); }
@@ -150,6 +150,10 @@
 .vf-pin-act .btn { --h: 34px; font-size: 13px; padding: 0 12px; }
 .vf-pin-act .link-spec { min-height: 34px; }
 .deck-list { overflow-y: auto; padding: 0 16px 20px; scrollbar-width: thin; overscroll-behavior: contain; }
+.deck-list { display: flex; flex-direction: column; }
+/* nothing in frame: the empty reel sits dead centre of the gate */
+.deck-list > .empty-reel { flex: 1; align-self: stretch; max-width: none; align-items: center; justify-content: center; text-align: center; padding: 24px 0 48px; }
+.deck-list > .empty-reel .er-s { max-width: 34ch; }
 .deck-list-head { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; padding: 14px 0 12px; background: linear-gradient(var(--base-2) 75%, transparent); }
 .hr-grid, .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 18px 10px; }
 .hr-item { display: flex; flex-direction: column; gap: 7px; text-align: left; transition: opacity .3s; }
