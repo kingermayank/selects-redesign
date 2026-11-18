@@ -1,5 +1,6 @@
 /* ── shell ─────────────────────────────────────────────────── */
 .app { --rail: 232px; min-height: 100svh; }
+@media (max-width: 1200px) { .app { --rail: 208px; } }
 .rail {
   position: fixed; z-index: 30; left: 0; top: 0; bottom: 0; width: var(--rail);
   display: flex; flex-direction: column; gap: 36px; padding: 22px 20px 22px 24px;
@@ -278,4 +279,9 @@
   .log { margin-left: 0; width: 100%; }
   .person-row { grid-template-columns: 1fr; gap: 4px; }
   .film-hero { height: 70vh; }
+}
+
+@media (min-width: 600px) and (max-width: 980px) {
+  .hr-grid, .lib-grid { grid-template-columns: repeat(4, 1fr); }
+  .vf-stage { aspect-ratio: 16 / 10; }
 }

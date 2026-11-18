@@ -1,4 +1,14 @@
 /* ─────────────────────────────────────────────────────────────
+   SELECTS · type and case
+   Headlines (h1, h2): sentence case, full stop. "Hunt by feel."
+   Feature names are proper nouns in Title Case: The Ticket, The Strip,
+     The Wallet, The Assembly, The Print, The Negative, The Viewfinder, The DNA.
+   Row titles (h3): sentence case, no full stop, unless a feature name.
+   Buttons: sentence case, verb first, no full stop. "Print my ticket".
+   Body and placeholders: sentence case, full stop on sentences.
+   Martian Mono: always capitals (labels, numbers, chips, links-in-mono).
+   Archetype names: capitals, always. Times: 10:40 PM.
+   ─────────────────────────────────────────────────────────────
    SELECTS · tokens
    Two inks, one rationed accent, and whatever colour the film brings.
    Hard edges. Radius zero. Archivo argues, Martian Mono measures.
@@ -286,3 +296,18 @@ a { color: inherit; text-decoration: none; }
 .poster::before { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(239,237,233,.06) 50%, transparent 70%) var(--base-3); background-size: 250% 100%; animation: shimmer 1.4s linear infinite; }
 .poster:has(img:not(.loading))::before { display: none; }
 @keyframes shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+
+/* ── the leader countdown ────────────────────────────────── */
+.leader { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.leader-dial { position: relative; width: var(--s); height: var(--s); display: grid; place-items: center; border-radius: 50%; overflow: hidden; background: #141416; }
+.leader-sweep { position: absolute; inset: 0; background: conic-gradient(from 0deg, rgba(239,237,233,.16) 0turn, rgba(239,237,233,.16) var(--p, 0turn), transparent var(--p, 0turn)); animation: leader .9s linear both; }
+@property --p { syntax: '<angle>'; inherits: false; initial-value: 0turn; }
+@keyframes leader { from { --p: 0turn; } to { --p: 1turn; } }
+.leader-dial svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: rgba(239,237,233,.42); stroke-width: 1; }
+.leader-n { position: relative; font-size: calc(var(--s) * 0.42); line-height: 1; color: var(--fg); }
+/* posters in rows and grids rest slightly under-developed, and come up under the hand */
+.row-item .poster img, .hr-item .poster img, .lib-grid .poster img { filter: saturate(.82) brightness(.94); }
+@media (hover: hover) {
+  .row-item:hover .poster img, .hr-item:hover .poster img, .lib-grid .hr-item:hover .poster img { filter: saturate(1.08) brightness(1.03); transform: scale(1.025); }
+}
+.hr-item.hl .poster img { filter: saturate(1.08) brightness(1.03); }

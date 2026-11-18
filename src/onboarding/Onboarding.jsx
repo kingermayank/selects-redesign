@@ -107,7 +107,7 @@ function Splash({ onDone }) {
       <motion.div className="splash-word" initial={{ opacity: 0, letterSpacing: '0.5em' }} animate={shut ? { opacity: 1, letterSpacing: '0.01em' } : {}} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}>
         SELECTS
       </motion.div>
-      <motion.p className="spec" initial={{ opacity: 0 }} animate={shut ? { opacity: 1 } : {}} transition={{ delay: 0.3, duration: 0.8 }}>Your taste, developed</motion.p>
+      <motion.p className="spec" initial={{ opacity: 0 }} animate={shut ? { opacity: 1 } : {}} transition={{ delay: 0.3, duration: 0.8 }}>House lights down</motion.p>
     </div>
   )
 }
@@ -135,7 +135,7 @@ function Name({ s, next }) {
         </motion.div>
         <form className="name-form" onSubmit={(e) => { e.preventDefault(); if (v.trim()) save() }}>
           <label className="field">
-            <input autoFocus value={v} maxLength={18} onChange={(e) => { setV(e.target.value); tick(4) }} placeholder="your first name" aria-label="Your first name" autoComplete="given-name" />
+            <input autoFocus value={v} maxLength={18} onChange={(e) => { setV(e.target.value); tick(4) }} placeholder="Your first name" aria-label="Your first name" autoComplete="given-name" />
           </label>
         </form>
       </div>
@@ -172,7 +172,7 @@ function Positive({ s, next }) {
         <p className="spec tray-count">{picks.length ? `${picks.length} of 5 in the reel` : 'Pick one to start the reel'}</p>
       </Q>
       <div className="ob-right">
-        <Search value={q} onChange={setQ} placeholder="search any film, director, actor" />
+        <Search value={q} onChange={setQ} placeholder="Search any film, director or actor" />
         <Wall list={list} picked={picks} onPick={toggle} kind="positive" label={q ? `Results for “${q}”` : picks.length ? 'Re-sorted around your pick' : 'Trending this week and always'} />
       </div>
       <CTA label="Continue" onClick={next} disabled={!picks.length} />
@@ -199,7 +199,7 @@ function Negative({ s, next }) {
         </div>
       </Q>
       <div className="ob-right">
-        <Search value={q} onChange={setQ} placeholder="search the ones you resisted" />
+        <Search value={q} onChange={setQ} placeholder="Search the ones you resisted" />
         <Wall list={list} picked={s.negative} onPick={toggle} kind="negative" label={q ? `Results for “${q}”` : 'Everyone loved these'} />
       </div>
       <CTA label="Continue" onClick={next} />
@@ -375,7 +375,7 @@ function Hour({ s, next }) {
 /* ── 6 · IMPORT: your Letterboxd, carried across ─────────────
    Linking is a transfer you can watch: light leaves the three dots,
    crosses the bridge, and lands in the five bars, one shelf at a time. */
-const SHELVES = [['Diary', 'every film, every date'], ['Ratings', 'half-stars included'], ['Likes', 'the hearts'], ['Watchlist', 'the ones you meant to']]
+const SHELVES = [['Diary', 'Every film, every date'], ['Ratings', 'Half-stars included'], ['Likes', 'The hearts'], ['Watchlist', 'The ones you meant to see']]
 const LB = ['#FF8000', '#00E054', '#40BCF4', '#efede9']
 function Import({ s, next }) {
   const [u, setU] = useState(s.letterboxd || '')

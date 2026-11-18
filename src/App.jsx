@@ -1,6 +1,6 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { loadFilms } from './lib/films.js'
-import { Router, useRoute, Cursor, Mark } from './components/ui.jsx'
+import { Router, useRoute, Cursor, Leader } from './components/ui.jsx'
 import Landing from './landing/Landing.jsx'
 import { MotesLayer } from './components/Motes.jsx'
 const Onboarding = lazy(() => import('./onboarding/Onboarding.jsx'))
@@ -39,19 +39,7 @@ export default function App() {
   )
 }
 
-/* Loading: the lit bar runs the mark like film through a gate, and the counter threads. */
+/* Loading: an academy leader counts down while the reel is threaded. */
 function Boot() {
-  const [lit, setLit] = useState(2)
-  useEffect(() => {
-    const seq = [3, 4, 3, 2, 1, 0, 1, 2]
-    let k = 0
-    const id = setInterval(() => setLit(seq[k++ % seq.length]), 90)
-    return () => clearInterval(id)
-  }, [])
-  return (
-    <div className="boot">
-      <Mark size={56} five lit={lit} hop />
-      <span className="spec">Threading</span>
-    </div>
-  )
+  return <div className="boot"><Leader /></div>
 }

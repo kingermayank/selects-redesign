@@ -45,7 +45,7 @@ export default function Home({ arch }) {
       <header className="home-head">
         <span className="spec">{DAYS[now.getDay()]} {now.getDate()} {MONTHS[now.getMonth()]} · {torn.length ? `${torn.length} kept for tonight` : `lights down in ${until < 1 ? 'under an hour' : `${Math.floor(until)}h ${String(Math.round((until % 1) * 60)).padStart(2, '0')}m`}`}</span>
         <h1 className="verdict home-h"><Rise text={`${DAYS[now.getDay()]}’s\nticket.`} stagger={0.07} /></h1>
-        <p className="home-sub">{greet}{s.name ? `, ${s.name.split(' ')[0]}` : ''}.</p>
+        <p className="home-sub">{greet}{s.name ? `, ${s.name.split(' ')[0]}` : ''}. Three on the bill tonight.</p>
       </header>
 
       <section className="home-tickets" onPointerLeave={() => {}}>

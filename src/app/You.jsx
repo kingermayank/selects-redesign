@@ -47,7 +47,7 @@ export default function You({ arch }) {
         <div className="you-fit"><h2 className="you-arch" style={{ '--n': arch ? arch.name.length : 4 }}>{arch ? arch.name : '—'}</h2></div>
         <p className="you-line">{arch ? arch.line : ''}</p>
         <div className="you-stats">
-          {[[s.positive.length + (s.kept || []).length, 'kept'], [s.negative.length, 'struck'], [(s.logged || []).length, 'logged'], [`${((hour + 11) % 12) + 1}${hour >= 12 ? 'P' : 'A'}`, 'lights down']].map(([n, l]) => (
+          {[[s.positive.length + (s.kept || []).length, 'kept'], [s.negative.length, 'struck'], [(s.logged || []).length, 'logged'], [`${((hour + 11) % 12) + 1} ${hour >= 12 ? 'PM' : 'AM'}`, 'lights down']].map(([n, l]) => (
             <div key={l} className="ys">
               <span className="numeral">{typeof n === 'number' ? <Counter to={n} duration={1.1} /> : n}</span>
               <span className="spec">{l}</span>

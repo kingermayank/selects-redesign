@@ -220,7 +220,7 @@
   .wall-split .q-sub { display: none; }
   .wall-split .q { padding-bottom: 18px; }
   .wall-split .q-mark { display: none; }
-  .imp-form { grid-template-columns: 1fr; }
+  .imp, .axes { margin-left: 0; margin-right: 0; }
   .shelf { grid-template-columns: 92px minmax(0, 1fr) auto 18px; gap: 10px; }
   .reveal { grid-template-columns: 1fr; padding-top: 64px; align-content: start; overflow: visible; }
   .reveal-right { order: -1; height: 40vh; margin: 0 calc(var(--gutter) * -1) 8px; }
@@ -234,3 +234,9 @@
   .ins-grid { grid-template-columns: 1fr; }
   .ins-card { min-height: 0; }
 }
+
+@media (min-width: 600px) and (max-width: 980px) {
+  .wall { grid-template-columns: repeat(5, 1fr); }
+  .ob-split .q { max-width: 620px; }
+}
+@media (max-width: 560px) { .imp-form { grid-template-columns: 1fr; } }

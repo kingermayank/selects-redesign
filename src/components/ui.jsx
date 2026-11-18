@@ -365,3 +365,22 @@ export function Img({ src, alt = '', className = '', style, eager }) {
   }, [src])
   return <img src={real || undefined} alt={alt} className={className} style={{ opacity: ok ? 1 : 0, transition: 'opacity .8s cubic-bezier(.22,1,.36,1)', ...style }} onLoad={() => setOk(true)} loading={eager ? 'eager' : 'lazy'} decoding="async" draggable={false} />
 }
+
+/* The academy leader: a countdown with the sweep, the crosshair and the rings. Used wherever we wait. */
+export function Leader({ size = 88, label = 'Threading' }) {
+  const [n, setN] = useState(3)
+  useEffect(() => { const id = setInterval(() => setN((x) => (x <= 1 ? 3 : x - 1)), 900); return () => clearInterval(id) }, [])
+  return (
+    <div className="leader" style={{ '--s': `${size}px` }} role="status" aria-label={label}>
+      <div className="leader-dial">
+        <i className="leader-sweep" key={n} />
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="46" /><circle cx="50" cy="50" r="38" />
+          <path d="M50 0V100M0 50H100" />
+        </svg>
+        <span className="numeral leader-n">{n}</span>
+      </div>
+      <span className="spec">{label}</span>
+    </div>
+  )
+}

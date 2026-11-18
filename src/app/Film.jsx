@@ -63,8 +63,8 @@ export default function Film({ id }) {
           </section>
 
           <div className="film-actions">
-            <button className={`btn ${kept ? 'ghost' : 'lit'}`} onClick={() => { tick(12); setState((st) => ({ kept: [...new Set([...(st.kept || []), id])] })) }} disabled={kept}>{kept ? 'Kept' : 'Keep for tonight'} <span className="arr"><Arrow /></span></button>
-            <button className={`btn ghost ${inList ? 'on' : ''}`} onClick={() => { tick(6); toggleIn('watchlist', id) }}>{inList ? 'On the watchlist' : 'Watchlist'}</button>
+            <button className={`btn ${kept ? 'ghost' : 'lit'}`} onClick={() => { tick(12); setState((st) => ({ kept: [...new Set([...(st.kept || []), id])] })) }} disabled={kept}>{kept ? 'Kept for tonight' : 'Keep for tonight'} <span className="arr"><Arrow /></span></button>
+            <button className={`btn ghost ${inList ? 'on' : ''}`} onClick={() => { tick(6); toggleIn('watchlist', id) }}>{inList ? 'On your watchlist' : 'Add to watchlist'}</button>
             <div className="log">
               <span className="spec">{rated ? 'Logged' : 'Rate'}</span>
               <Bars value={rated} size={22} onChange={log} />
@@ -85,7 +85,7 @@ export default function Film({ id }) {
         </div>
 
         <aside className="film-dna">
-          <div className="row-head"><h3 className="row-title">DNA</h3></div>
+          <div className="row-head"><h3 className="row-title">The DNA</h3></div>
           <div className="dna-stage"><Assembly ids={dna} you={c} height={'100%'} youLabel={f.t.toUpperCase()} onOpen={(x) => go(`film-${x.id}`)} intro={false} /></div>
           <div className="film-kw">{f.k.slice(0, 10).map((k) => <span key={k} className="chip">{k}</span>)}</div>
         </aside>

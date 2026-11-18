@@ -11,6 +11,7 @@ import Hunt from './Hunt.jsx'
 import Library from './Library.jsx'
 import You from './You.jsx'
 import Film from './Film.jsx'
+import { GATE_IN, GATE_OUT } from '../lib/motion.js'
 import './app.css'
 
 const TABS = [
@@ -75,9 +76,9 @@ export default function Shell() {
           <motion.div
             key={filmId ? `film-${filmId}` : tab}
             className="page"
-            initial={{ opacity: 0, y: filmId ? 32 : 14 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } }}
-            exit={{ opacity: 0, y: -6, filter: 'blur(4px)', transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={GATE_IN}
+            exit={GATE_OUT}
           >
             {filmId ? <Film id={filmId} /> : tab === 'hunt' ? <Hunt /> : tab === 'library' ? <Library /> : tab === 'you' ? <You arch={arch} /> : <Home arch={arch} />}
           </motion.div>

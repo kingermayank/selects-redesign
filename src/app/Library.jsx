@@ -32,7 +32,7 @@ export default function Library() {
   return (
     <div className="library">
       <header className="page-head">
-        <h1 className="verdict page-h">Your shelf.</h1>
+        <h1 className="verdict page-h">The vault.</h1>
       </header>
 
       <section className="lib-strip" onPointerLeave={() => setHov(-1)}>

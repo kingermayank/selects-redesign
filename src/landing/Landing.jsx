@@ -55,6 +55,13 @@ export default function Landing() {
   )
 }
 
+const TODAY = (() => { const d = new Date(); return `${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]} ${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}` })()
+
+/* Each section is a reel: a numbered can label, sprocket and all. */
+function Reel({ n, name }) {
+  return <p className="spec reel-k"><span className="reel-holes" aria-hidden="true"><i /><i /><i /></span>Reel {String(n).padStart(2, '0')} · {name}</p>
+}
+
 /* ── NAV ───────────────────────────────────────────────────── */
 function Nav({ to, start, returning }) {
   const [solid, setSolid] = useState(false)
@@ -129,11 +136,12 @@ function Hero({ start }) {
       </div>
       <div className="hero-vignette" />
       <motion.div className="hero-copy" style={{ y: textY, opacity: textO }}>
+        <motion.p className="spec hero-kick" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.8 }}><i className="live-dot" />Now showing · {TODAY}</motion.p>
         <h1 className="verdict hero-h">
-          <Rise text={'Your taste,\ndeveloped.'} delay={0.35} stagger={0.09} />
+          <Rise text={'Tonight’s reel,\ncut from your diary.'} delay={0.35} stagger={0.09} />
         </h1>
         <motion.div className="hero-cta" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 1, ease: [0.16, 1, 0.3, 1] }}>
-          <p className="lead hero-lead">Selects reads your Letterboxd and prints three films for tonight. Each one says why.</p>
+          <p className="lead hero-lead">Selects reads your Letterboxd and programmes three films for tonight. Two close to home, one reach.</p>
           <form className="hero-form" onSubmit={(e) => { e.preventDefault(); start(lb) }}>
             <label className="field hero-field">
               <span className="pre"><LbDots />letterboxd.com/</span>
@@ -218,6 +226,7 @@ function TicketSection() {
   return (
     <section id="ticket" className="t-sec">
       <div className="t-copy">
+        <Reel n={1} name="The Ticket" />
         <Rise as="h2" className="verdict sec-h" text={'Three films.\nOne is a reach.'} />
         <p className="spec t-hint">{torn ? 'Kept for tonight.' : <>Tear a stub to keep it <Arrow /></>}</p>
       </div>
@@ -279,6 +288,7 @@ function StripSection() {
   return (
     <section className="s-sec">
       <div className="s-head">
+        <Reel n={2} name="The Strip" />
         <Rise as="h2" className="verdict sec-h" text={'A century of cinema.\nOne strip.'} />
       </div>
       <div className="s-stage">
@@ -322,7 +332,8 @@ function AssemblySection() {
   return (
     <section id="assembly" className="a-sec">
       <div className="a-copy">
-        <Rise as="h2" className="verdict sec-h" text={'Your taste, as the\npeople who made it.'} />
+        <Reel n={3} name="The Assembly" />
+        <Rise as="h2" className="verdict sec-h" text={'Your taste,\nin the end credits.'} />
       </div>
       <div className="a-stage">
         <Assembly ids={all} you="#3A6E85" height={'100%'} />
@@ -361,7 +372,8 @@ function Negatives({ start }) {
     <section id="negative" className="n-sec" ref={sec} style={{ '--len': entries.length }}>
       <div className="n-sticky">
         <div className="n-head">
-          <Rise as="h2" className="verdict sec-h" text={'Eight ways\nto watch a film.'} />
+          <div><Reel n={4} name="The Negative" />
+          <Rise as="h2" className="verdict sec-h" text={'Eight ways\nto watch a film.'} /></div>
           <p className="lead">Your read develops into one of them. Which is yours?</p>
         </div>
         <motion.div className="n-track" ref={track} style={{ x: xs }}>
@@ -405,7 +417,8 @@ function Devices() {
   return (
     <section className="d-sec" ref={ref}>
       <div className="d-copy">
-        <Rise as="h2" className="verdict sec-h" text={'In your pocket\nat 9:40 pm.'} />
+        <Reel n={5} name="Showtime" />
+        <Rise as="h2" className="verdict sec-h" text={'In your pocket\nat 9:40 PM.'} />
       </div>
       <div className="d-stage">
         <motion.div className="d-desk" style={{ y: dy }}>
@@ -465,6 +478,7 @@ function Vocabulary() {
   return (
     <section className="v-sec" onPointerMove={onMove}>
       <div className="v-head">
+        <Reel n={6} name="Glossary" />
         <Rise as="h2" className="verdict sec-h" text={'Named from the\ncutting room.'} />
       </div>
       <ul className="v-list">
@@ -492,7 +506,7 @@ function Final({ start }) {
   return (
     <section className="f-sec" ref={ref}>
       <div className="f-mark">{inView ? <Clap size={132} delay={0.1} /> : <div style={{ height: 132 }} />}</div>
-      <Rise as="h2" className="verdict f-h" text={'Bring your diary.'} />
+      <Rise as="h2" className="verdict f-h" text={'Lights down.\nBring your diary.'} />
       <form className="f-form" onSubmit={(e) => { e.preventDefault(); start(lb) }}>
         <label className="field">
           <span className="pre"><LbDots />letterboxd.com/</span>
