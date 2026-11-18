@@ -74,7 +74,6 @@ export function EmptyReel({ title, sub, action, onAction, kicker }) {
     <div className="empty-reel">
       <div className="er-strip" aria-hidden="true">
         {[0, 1, 2, 3, 4].map((i) => <span key={i} className={`er-frame ${i === 2 ? 'lit' : ''}`}>{i === 2 && <i className="bar-atom" />}</span>)}
-        <span className="er-sweep" />
       </div>
       {kicker && <span className="spec">{kicker}</span>}
       <b className="er-t">{title}</b>

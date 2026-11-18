@@ -100,7 +100,7 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
       uExpLo: { value: 0 },
       uExpHi: { value: 0 },
       uGateU: { value: 0 },
-      uRim: { value: 0.42 },
+      uRim: { value: 0.16 },
     },
     vertexShader: /* glsl */ `
       attribute vec3 aTangent;
@@ -192,11 +192,10 @@ export function stripMaterial({ atlas, edge, frameLen = 1.18, width = 1 }) {
         float facing = abs(dot(N, V));
         float rim = pow(1.0 - facing, 2.5);
         vec3 H = normalize(uLight + V);
-        float spec = pow(max(dot(N, H), 0.0), 60.0);
-        float sweep = smoothstep(0.08, 0.0, abs(fract(vUv.x * 0.06 - uTime * 0.05) - 0.5) - 0.42);
+        float spec = pow(max(dot(N, H), 0.0), 6.0);
         col *= 0.6 + 0.55 * facing;
         col += rim * vec3(0.78, 0.82, 0.92) * uRim;
-        col += spec * vec3(1.0) * 0.85 + sweep * vec3(0.9, 0.92, 1.0) * 0.07;
+        col += spec * vec3(1.0) * 0.05;
         col *= uBright;
         float fog = smoothstep(uFog.x, uFog.y, vDepth);
         col = mix(col, uFogColor, fog);
