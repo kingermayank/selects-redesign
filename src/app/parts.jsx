@@ -45,7 +45,7 @@ export function Row({ title, kicker, items, wide = false, onAll }) {
 }
 
 /* Five bars: a rating, or a match. Fills left to right. */
-export function Bars({ value = 0, max = 5, size = 14, lit = true, onChange }) {
+export function Bars({ value = 0, max = 5, size = 14, lit = true, onChange, from0 = false }) {
   return (
     <span className="bars" role={onChange ? 'radiogroup' : undefined}>
       {Array.from({ length: max }).map((_, i) => {
@@ -59,7 +59,7 @@ export function Bars({ value = 0, max = 5, size = 14, lit = true, onChange }) {
             aria-label={onChange ? `${i + 1} of ${max}` : undefined}
             tabIndex={onChange ? 0 : -1}
           >
-            <motion.i initial={false} animate={{ scaleY: fill }} transition={{ type: 'spring', stiffness: 500, damping: 30, delay: i * 0.04 }} style={{ background: lit && i === Math.ceil(value) - 1 ? 'var(--select)' : 'var(--fg)' }} />
+            <motion.i className={lit && i === Math.ceil(value) - 1 ? 'lit' : undefined} initial={from0 ? { scaleY: 0 } : false} animate={{ scaleY: fill }} transition={{ type: 'spring', stiffness: 500, damping: 30, delay: from0 ? 0.05 + i * 0.075 : i * 0.04 }} style={{ background: lit && i === Math.ceil(value) - 1 ? 'var(--select)' : 'var(--fg)' }} />
           </button>
         )
       })}

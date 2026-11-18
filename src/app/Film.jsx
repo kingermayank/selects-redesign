@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Arrow } from '../components/Icons.jsx'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, animate } from 'framer-motion'
+import { play } from '../lib/sound.js'
 import { Img, useRoute } from '../components/ui.jsx'
 import Wheel from '../components/Wheel.jsx'
 import { Row, Bars } from './parts.jsx'
@@ -55,10 +56,7 @@ export default function Film({ id }) {
         <div className="film-main">
           <section className="select-score">
             <span className="spec lit">Select</span>
-            <div className="ss-row">
-              <Bars value={match / 20} size={34} />
-              <span className="numeral ss-n">{match}</span>
-            </div>
+            <SelectMeter match={match} />
             <p className="ss-why">{entry ? reason(entry) : s.positive.includes(id) ? 'You kept this one.' : ''}</p>
           </section>
 
@@ -93,5 +91,34 @@ export default function Film({ id }) {
 
       <Row title="More like this" items={more} />
     </article>
+  )
+}
+
+/* The Select score is a meter, and a meter takes a reading: on arrival and whenever
+   the hand comes near, the bars drop and refill one by one and the number rolls up
+   to the match. At rest the lit bar breathes, so it never reads as dead. */
+function SelectMeter({ match }) {
+  const [read, setRead] = useState(0)
+  const num = useRef(null)
+  const last = useRef(0)
+  useEffect(() => {
+    if (!num.current) return
+    const from = read ? Math.max(0, match - 34) : Math.max(0, match - 50)
+    const c = animate(from, match, { duration: read ? 0.9 : 1.2, ease: [0.16, 1, 0.3, 1], onUpdate: (v) => num.current && (num.current.textContent = Math.round(v)) })
+    return () => c.stop()
+  }, [read, match])
+  const reread = () => {
+    const now = performance.now()
+    if (now - last.current < 1400) return
+    last.current = now
+    setRead((r) => r + 1); play('detent')
+    setTimeout(() => play('detent'), 420)
+  }
+  return (
+    <div className="ss-row" onPointerEnter={reread} onClick={reread} data-cursor="RE-READ">
+      <Bars key={read} value={match / 20} size={34} from0={read > 0} />
+      <span ref={num} className="numeral ss-n">{match}</span>
+      <span className="ss-scan" key={`s${read}`} aria-hidden="true" />
+    </div>
   )
 }
