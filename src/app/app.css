@@ -12,6 +12,17 @@
 .rail-item:hover { color: var(--fg); background: var(--base-2); }
 .rail-item.on { color: var(--fg); }
 .rail-lit { position: absolute; left: -24px; top: 12px; bottom: 12px; width: 3px; background: var(--select); }
+/* the lamp: light leaves the lit bar in a cone and fades across the item, like a camera that is rolling */
+.rail-lit::before { content: ''; position: absolute; left: 0; top: 50%; width: 3px; height: 22px; translate: 0 -50%; background: var(--select); box-shadow: 0 0 12px 2px rgba(255,59,20,.55); }
+.rail-lit::after {
+  content: ''; position: absolute; z-index: -1; left: 3px; top: 50%; width: 230px; height: 96px; translate: 0 -50%; pointer-events: none;
+  clip-path: polygon(0 36%, 100% 0, 100% 100%, 0 64%);
+  background:
+    radial-gradient(70% 42% at 0% 50%, rgba(255,59,20,.34), transparent 70%),
+    linear-gradient(90deg, rgba(255,59,20,.2), rgba(255,59,20,.07) 45%, rgba(255,59,20,0) 92%);
+  mix-blend-mode: screen; animation: lamp 3.2s var(--ease-io) infinite;
+}
+@keyframes lamp { 0%, 100% { opacity: 1; } 45% { opacity: .82; } 52% { opacity: .95; } 58% { opacity: .78; } }
 .rail-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding: 0 4px 0 12px; margin-bottom: -24px; }
 .top-end { display: inline-flex; align-items: center; gap: 6px; }
 .rail-you { display: flex; align-items: center; gap: 12px; padding: 12px; box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; transition: box-shadow .3s; }
@@ -36,6 +47,12 @@
   .tab { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0 4px; min-height: 56px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); }
   .tab.on { color: var(--fg); }
   .tab-lit { position: absolute; top: -7px; left: 30%; right: 30%; height: 2px; background: var(--select); }
+  .tab-lit::after {
+    content: ''; position: absolute; z-index: -1; left: -60%; right: -60%; top: 2px; height: 56px; pointer-events: none;
+    clip-path: polygon(36% 0, 64% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, rgba(255,59,20,.26), rgba(255,59,20,.06) 55%, rgba(255,59,20,0));
+    mix-blend-mode: screen; animation: lamp 3.2s var(--ease-io) infinite;
+  }
   .sample { flex-direction: column; align-items: flex-start; gap: 0; }
 }
 
@@ -315,3 +332,5 @@
   .story-acts .btn { flex: 1 1 100%; }
   .story-note { margin: 0; }
 }
+
+@media (prefers-reduced-motion: reduce) { .rail-lit::after, .tab-lit::after { animation: none; } }
