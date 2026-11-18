@@ -11,15 +11,18 @@
 .rail-item svg { flex: none; }
 .rail-item:hover { color: var(--fg); background: var(--base-2); }
 .rail-item.on { color: var(--fg); }
-.rail-lit { position: absolute; left: -12px; top: 12px; bottom: 12px; width: 3px; background: var(--select); }
-/* the lamp: a faint cone that leaves from inside the lit bar and is gone before the label ends */
+.rail-lit { position: absolute; z-index: 0; left: -24px; top: 12px; bottom: 12px; width: 3px; background: var(--select); box-shadow: 3px 0 10px -2px rgba(255,59,20,.55); }
+.rail-item > svg, .rail-item > span { position: relative; z-index: 1; }
+/* the lens: light leaves the bar at the bar's own height and opens to fill the item,
+   edge to edge, so the beam and the hover box are one shape */
 .rail-lit::after {
-  content: ''; position: absolute; z-index: -1; left: 0; top: 50%; width: 132px; height: 64px; translate: 0 -50%; pointer-events: none;
-  clip-path: polygon(0 45%, 100% 8%, 100% 92%, 0 55%);
-  background: linear-gradient(90deg, rgba(255,59,20,.07), rgba(255,59,20,.025) 45%, rgba(255,59,20,0) 100%);
-  animation: lamp 3.2s var(--ease-io) infinite;
+  content: ''; position: absolute; left: 3px; top: -12px; bottom: -12px; width: calc(var(--rail) - 23px); pointer-events: none;
+  clip-path: polygon(0 26%, 100% 0, 100% 100%, 0 74%);
+  background: linear-gradient(90deg, rgba(255,59,20,.2), rgba(255,59,20,.08) 38%, rgba(255,59,20,.015) 80%, rgba(255,59,20,0));
+  opacity: .85; transition: opacity .35s var(--ease); animation: lamp 3.6s var(--ease-io) infinite;
 }
-@keyframes lamp { 0%, 100% { opacity: 1; } 45% { opacity: .82; } 52% { opacity: .95; } 58% { opacity: .78; } }
+.rail-item.on:hover .rail-lit::after { opacity: 1; }
+@keyframes lamp { 0%, 100% { filter: brightness(1); } 46% { filter: brightness(.86); } 52% { filter: brightness(1.04); } 58% { filter: brightness(.9); } }
 .rail-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding: 0 4px 0 12px; margin-bottom: -24px; }
 .top-end { display: inline-flex; align-items: center; gap: 6px; }
 .rail-you { display: flex; align-items: center; gap: 12px; padding: 12px; box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; transition: box-shadow .3s; }
@@ -44,11 +47,13 @@
   .tab { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0 4px; min-height: 56px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); }
   .tab.on { color: var(--fg); }
   .tab-lit { position: absolute; top: -7px; left: 30%; right: 30%; height: 2px; background: var(--select); }
+  .tab-lit { z-index: 0; }
+  .tab > svg, .tab > span { position: relative; z-index: 1; }
   .tab-lit::after {
-    content: ''; position: absolute; z-index: -1; left: -40%; right: -40%; top: 2px; height: 40px; pointer-events: none;
-    clip-path: polygon(36% 0, 64% 0, 100% 100%, 0 100%);
-    background: linear-gradient(180deg, rgba(255,59,20,.07), rgba(255,59,20,.02) 50%, rgba(255,59,20,0) 85%);
-    mix-blend-mode: screen; animation: lamp 3.2s var(--ease-io) infinite;
+    content: ''; position: absolute; left: -75%; right: -75%; top: 2px; height: 62px; pointer-events: none;
+    clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, rgba(255,59,20,.18), rgba(255,59,20,.06) 45%, rgba(255,59,20,0));
+    animation: lamp 3.6s var(--ease-io) infinite;
   }
   .sample { flex-direction: column; align-items: flex-start; gap: 0; }
 }
